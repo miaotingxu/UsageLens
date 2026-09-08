@@ -32,7 +32,25 @@
             BorderThickness="1"
             CornerRadius="0,0,10,10"
             SnapsToDevicePixels="True">
-      <Grid Margin="18,6,18,6">
+      <Border.Resources>
+        <Style x:Key="PageDotButton" TargetType="Button">
+          <Setter Property="Width" Value="14" />
+          <Setter Property="Height" Value="14" />
+          <Setter Property="Padding" Value="4" />
+          <Setter Property="Background" Value="Transparent" />
+          <Setter Property="BorderThickness" Value="0" />
+          <Setter Property="Cursor" Value="Hand" />
+          <Setter Property="Template">
+            <Setter.Value>
+              <ControlTemplate TargetType="Button">
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </ControlTemplate>
+            </Setter.Value>
+          </Setter>
+        </Style>
+      </Border.Resources>
+      <Grid>
+      <Grid x:Name="QuotaPage" Margin="18,6,18,6">
         <Grid.RowDefinitions>
           <RowDefinition Height="42" />
           <RowDefinition Height="46" />
@@ -153,6 +171,92 @@
                      Text="正在连接 Codex…"
                      TextTrimming="CharacterEllipsis" />
         </Border>
+      </Grid>
+
+      <Grid x:Name="TokenPage"
+            Margin="18,6,18,6"
+            Visibility="Collapsed">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="31" />
+          <RowDefinition Height="31" />
+          <RowDefinition Height="31" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid.Resources>
+          <Style x:Key="TokenPeriodLabel" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontFamily" Value="Microsoft YaHei UI" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="#D9FFFFFF" />
+          </Style>
+          <Style x:Key="TokenValue" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontFamily" Value="Microsoft YaHei UI" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+          </Style>
+        </Grid.Resources>
+
+        <Grid Grid.Row="0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Style="{StaticResource TokenPeriodLabel}" Text="当日" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock x:Name="TodayTotalValue" Style="{StaticResource TokenValue}" Foreground="#79C8FF" Text="..." />
+            <TextBlock x:Name="TodayPriceValue" Margin="5,0,0,0" Style="{StaticResource TokenValue}" Foreground="#78D6A5" Text="(约...)" />
+          </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Style="{StaticResource TokenPeriodLabel}" Text="近7天" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock x:Name="SevenDayTotalValue" Style="{StaticResource TokenValue}" Foreground="#79C8FF" Text="..." />
+            <TextBlock x:Name="SevenDayPriceValue" Margin="5,0,0,0" Style="{StaticResource TokenValue}" Foreground="#78D6A5" Text="(约...)" />
+          </StackPanel>
+        </Grid>
+        <Grid Grid.Row="2">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Style="{StaticResource TokenPeriodLabel}" Text="近30天" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock x:Name="ThirtyDayTotalValue" Style="{StaticResource TokenValue}" Foreground="#79C8FF" Text="..." />
+            <TextBlock x:Name="ThirtyDayPriceValue" Margin="5,0,0,0" Style="{StaticResource TokenValue}" Foreground="#78D6A5" Text="(约...)" />
+          </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="3"
+                BorderBrush="#26FFFFFF"
+                BorderThickness="0,1,0,0">
+          <TextBlock x:Name="TokenStatusValue"
+                     Margin="0,5,38,0"
+                     VerticalAlignment="Center"
+                     FontFamily="Microsoft YaHei UI"
+                     FontSize="11"
+                     Foreground="#B8D5E8"
+                     Text="Loading…"
+                     TextTrimming="CharacterEllipsis" />
+        </Border>
+      </Grid>
+
+      <StackPanel Margin="0,0,12,7"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Bottom"
+                  Orientation="Horizontal">
+        <Button Style="{StaticResource PageDotButton}" ToolTip="额度" Click="QuotaPageButtonOnClick">
+          <Ellipse x:Name="QuotaPageDot" Width="6" Height="6" Fill="#D9FFFFFF" />
+        </Button>
+        <Button Style="{StaticResource PageDotButton}" ToolTip="Token" Click="TokenPageButtonOnClick">
+          <Ellipse x:Name="TokenPageDot" Width="6" Height="6" Fill="#55FFFFFF" />
+        </Button>
+      </StackPanel>
       </Grid>
     </Border>
 

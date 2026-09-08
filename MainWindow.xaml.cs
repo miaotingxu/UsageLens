@@ -21,15 +21,20 @@ public partial class MainWindow : Window, IDisposable
 
     private readonly CodexAppServerClient _client = new();
     private readonly QuotaParser _quotaParser = new();
+    private readonly LocalTokenUsageService _tokenUsageService = new();
     private readonly DispatcherTimer _refreshTimer;
+    private readonly DispatcherTimer _tokenRefreshTimer;
     private readonly DispatcherTimer _reconnectTimer;
     private readonly DispatcherTimer _countdownTimer;
     private readonly SemaphoreSlim _refreshGate = new(1, 1);
+    private readonly SemaphoreSlim _tokenRefreshGate = new(1, 1);
     private readonly CancellationTokenSource _lifetimeCancellation = new();
 
     private FloatingWindowController? _floatingWindowController;
     private QuotaState _currentState = QuotaState.Loading();
     private QuotaState? _lastSuccessfulState;
+    private TokenUsageState _tokenUsageState = TokenUsageState.Loading();
+    private TokenUsageState? _lastSuccessfulTokenUsageState;
     private int _reconnectAttempt;
     private bool _disposed;
 
@@ -40,6 +45,9 @@ public partial class MainWindow : Window, IDisposable
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
         _refreshTimer.Tick += RefreshTimerOnTick;
 
+        _tokenRefreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(5) };
+        _tokenRefreshTimer.Tick += TokenRefreshTimerOnTick;
+
         _reconnectTimer = new DispatcherTimer();
         _reconnectTimer.Tick += ReconnectTimerOnTick;
 
@@ -48,6 +56,7 @@ public partial class MainWindow : Window, IDisposable
 
         _client.Exited += ClientOnExited;
         SetQuotaState(_currentState);
+        SetTokenUsageState(_tokenUsageState);
     }
 
     public void SetQuotaState(QuotaState state, string? statusMessage = null)
@@ -72,9 +81,11 @@ public partial class MainWindow : Window, IDisposable
 
         _disposed = true;
         _refreshTimer.Stop();
+        _tokenRefreshTimer.Stop();
         _reconnectTimer.Stop();
         _countdownTimer.Stop();
         _refreshTimer.Tick -= RefreshTimerOnTick;
+        _tokenRefreshTimer.Tick -= TokenRefreshTimerOnTick;
         _reconnectTimer.Tick -= ReconnectTimerOnTick;
         _countdownTimer.Tick -= CountdownTimerOnTick;
         _lifetimeCancellation.Cancel();
@@ -88,8 +99,9 @@ public partial class MainWindow : Window, IDisposable
         PositionOnPrimaryScreen();
         _floatingWindowController = new FloatingWindowController(this, Card, HoverZone);
         _refreshTimer.Start();
+        _tokenRefreshTimer.Start();
         _countdownTimer.Start();
-        await RefreshAsync();
+        await Task.WhenAll(RefreshAsync(), RefreshTokenUsageAsync());
     }
 
     private void WindowOnClosed(object? sender, EventArgs e)
@@ -104,6 +116,8 @@ public partial class MainWindow : Window, IDisposable
 
     private async void RefreshTimerOnTick(object? sender, EventArgs e) => await RefreshAsync();
 
+    private async void TokenRefreshTimerOnTick(object? sender, EventArgs e) => await RefreshTokenUsageAsync();
+
     private async void ReconnectTimerOnTick(object? sender, EventArgs e)
     {
         _reconnectTimer.Stop();
@@ -112,7 +126,8 @@ public partial class MainWindow : Window, IDisposable
 
     private void CountdownTimerOnTick(object? sender, EventArgs e) => UpdateQuotaPresentation();
 
-    private async void RefreshMenuItemOnClick(object sender, RoutedEventArgs e) => await RefreshAsync();
+    private async void RefreshMenuItemOnClick(object sender, RoutedEventArgs e) =>
+        await Task.WhenAll(RefreshAsync(), RefreshTokenUsageAsync());
 
     private void ExitMenuItemOnClick(object sender, RoutedEventArgs e) => Close();
 
@@ -147,6 +162,37 @@ public partial class MainWindow : Window, IDisposable
         finally
         {
             _refreshGate.Release();
+        }
+    }
+
+    private async Task RefreshTokenUsageAsync()
+    {
+        if (_disposed || !_tokenRefreshGate.Wait(0))
+        {
+            return;
+        }
+
+        try
+        {
+            TokenStatusValue.Text = _lastSuccessfulTokenUsageState is null ? "Loading…" : "Refreshing…";
+            TokenStatusValue.Foreground = Brushes.LightSteelBlue;
+            var state = await Task.Run(
+                async () => await _tokenUsageService.ReadAsync(DateTimeOffset.Now, _lifetimeCancellation.Token),
+                _lifetimeCancellation.Token);
+            _lastSuccessfulTokenUsageState = state;
+            SetTokenUsageState(state);
+        }
+        catch (OperationCanceledException) when (_lifetimeCancellation.IsCancellationRequested)
+        {
+            // 应用正在退出，无需改变界面状态。
+        }
+        catch
+        {
+            SetTokenUsageState(_lastSuccessfulTokenUsageState?.MarkStale() ?? TokenUsageState.Offline());
+        }
+        finally
+        {
+            _tokenRefreshGate.Release();
         }
     }
 
@@ -237,6 +283,63 @@ public partial class MainWindow : Window, IDisposable
         QuotaColorBand.Red => new SolidColorBrush(Color.FromRgb(0xFF, 0x7C, 0x74)),
         _ => new SolidColorBrush(Color.FromRgb(0xD7, 0xDE, 0xE7))
     };
+
+    private void SetTokenUsageState(TokenUsageState state)
+    {
+        _tokenUsageState = state;
+        SetTokenPeriod(TodayTotalValue, TodayPriceValue, state.Today, state.Status);
+        SetTokenPeriod(SevenDayTotalValue, SevenDayPriceValue, state.Last7Days, state.Status);
+        SetTokenPeriod(ThirtyDayTotalValue, ThirtyDayPriceValue, state.Last30Days, state.Status);
+
+        TokenStatusValue.Text = state.Status switch
+        {
+            TokenUsageStatus.Loading => "Loading…",
+            TokenUsageStatus.Ready when state.LastUpdatedAt is { } updated => $"Updated {updated.ToLocalTime():HH:mm:ss}",
+            TokenUsageStatus.Stale => "Read failed · showing previous data",
+            _ => "--"
+        };
+        TokenStatusValue.Foreground = state.Status switch
+        {
+            TokenUsageStatus.Ready => Brushes.LightSteelBlue,
+            TokenUsageStatus.Stale => Brushes.Khaki,
+            TokenUsageStatus.Offline => Brushes.LightCoral,
+            _ => Brushes.Gainsboro
+        };
+    }
+
+    private static void SetTokenPeriod(
+        TextBlock totalText,
+        TextBlock priceText,
+        TokenUsagePeriod period,
+        TokenUsageStatus status)
+    {
+        var placeholder = status == TokenUsageStatus.Loading ? "..." : "--";
+        var totalTokens = period.InputTokens + period.OutputTokens;
+        totalText.Text = status is TokenUsageStatus.Ready or TokenUsageStatus.Stale
+            ? TokenUsagePresentation.FormatCompact(totalTokens)
+            : placeholder;
+        priceText.Text = status is TokenUsageStatus.Ready or TokenUsageStatus.Stale
+            ? $"(约{TokenUsagePresentation.FormatEstimatedPrice(period.EstimatedPriceUsd)}{(period.UnpricedTokens > 0 ? "*" : string.Empty)})"
+            : $"(约{placeholder})";
+
+        var tooltip = status is TokenUsageStatus.Ready or TokenUsageStatus.Stale
+            ? TokenUsagePresentation.FormatTooltip(period)
+            : null;
+        totalText.ToolTip = tooltip;
+        priceText.ToolTip = tooltip;
+    }
+
+    private void QuotaPageButtonOnClick(object sender, RoutedEventArgs e) => ShowTokenPage(showTokenPage: false);
+
+    private void TokenPageButtonOnClick(object sender, RoutedEventArgs e) => ShowTokenPage(showTokenPage: true);
+
+    private void ShowTokenPage(bool showTokenPage)
+    {
+        QuotaPage.Visibility = showTokenPage ? Visibility.Collapsed : Visibility.Visible;
+        TokenPage.Visibility = showTokenPage ? Visibility.Visible : Visibility.Collapsed;
+        QuotaPageDot.Fill = new SolidColorBrush(Color.FromArgb(showTokenPage ? (byte)0x55 : (byte)0xD9, 0xFF, 0xFF, 0xFF));
+        TokenPageDot.Fill = new SolidColorBrush(Color.FromArgb(showTokenPage ? (byte)0xD9 : (byte)0x55, 0xFF, 0xFF, 0xFF));
+    }
 
     private void SetStatusText(string message, Brush foreground)
     {

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../../Models/TokenUsageState.cs" Link="Models/TokenUsageState.cs" />
+    <Compile Include="../../Services/LocalTokenUsageService.cs" Link="Services/LocalTokenUsageService.cs" />
+    <Compile Include="../../Services/TokenUsagePresentation.cs" Link="Services/TokenUsagePresentation.cs" />
+    <Compile Include="../../Services/TokenUsagePricing.cs" Link="Services/TokenUsagePricing.cs" />
+  </ItemGroup>
+</Project>
