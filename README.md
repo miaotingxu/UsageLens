@@ -31,8 +31,10 @@ dotnet run --project .\CodexQuotaFloat.csproj
 发布为可分发目录：
 
 ```powershell
-dotnet publish .\CodexQuotaFloat.csproj -c Release -r win-x64 --self-contained false
+dotnet publish .\CodexQuotaFloat.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=None -p:DebugSymbols=false -o .\release-floating-auto
 ```
+
+发布结果为单个便携式 `CodexQuotaFloat.exe`，目标电脑无需安装 .NET Runtime；但仍需安装并登录 Codex，以便读取本机额度。
 
 ## 使用方式
 
