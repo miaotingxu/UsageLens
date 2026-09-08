@@ -23,113 +23,62 @@
     </ContextMenu>
   </Window.ContextMenu>
 
+  <Window.Resources>
+    <Style x:Key="StyleOption" TargetType="Button">
+      <Setter Property="Height" Value="24" />
+      <Setter Property="Margin" Value="0,1" />
+      <Setter Property="Padding" Value="7,0" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Foreground" Value="#C9D3DF" />
+      <Setter Property="FontFamily" Value="Microsoft YaHei UI" />
+      <Setter Property="FontSize" Value="9" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Style.Triggers>
+        <Trigger Property="IsMouseOver" Value="True">
+          <Setter Property="Background" Value="#20FFFFFF" />
+          <Setter Property="Foreground" Value="#F3F7FC" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+  </Window.Resources>
+
   <Grid>
     <Border x:Name="Card"
             Height="195"
             VerticalAlignment="Top"
-            Background="#B3171B23"
-            BorderBrush="#33FFFFFF"
-            BorderThickness="1"
-            CornerRadius="0,0,10,10"
+            Background="Transparent"
             SnapsToDevicePixels="True">
-      <Border.Resources>
-        <Style x:Key="TokenPeriodLabel" TargetType="TextBlock">
-          <Setter Property="VerticalAlignment" Value="Center" />
-          <Setter Property="FontFamily" Value="Microsoft YaHei UI" />
-          <Setter Property="FontSize" Value="12" />
-          <Setter Property="Foreground" Value="#D9FFFFFF" />
-        </Style>
-        <Style x:Key="TokenValue" TargetType="TextBlock">
-          <Setter Property="VerticalAlignment" Value="Center" />
-          <Setter Property="FontFamily" Value="Microsoft YaHei UI" />
-          <Setter Property="FontSize" Value="11" />
-          <Setter Property="FontWeight" Value="SemiBold" />
-        </Style>
-      </Border.Resources>
+      <Grid>
+        <ContentControl x:Name="StyleContent" />
 
-      <Grid Margin="18,5,18,5">
-        <Grid.RowDefinitions>
-          <RowDefinition Height="42" />
-          <RowDefinition Height="46" />
-          <RowDefinition Height="1" />
-          <RowDefinition Height="27" />
-          <RowDefinition Height="27" />
-          <RowDefinition Height="27" />
-          <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <Grid Grid.Row="0">
-          <Grid.RowDefinitions>
-            <RowDefinition Height="36" />
-            <RowDefinition Height="6" />
-          </Grid.RowDefinitions>
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-          <StackPanel Grid.Row="0" VerticalAlignment="Center">
-            <TextBlock FontFamily="Microsoft YaHei UI" FontSize="14" Foreground="#D9FFFFFF" Text="5小时" />
-            <TextBlock x:Name="FiveHourResetValue" Margin="0,1,0,0" FontFamily="Microsoft YaHei UI" FontSize="12" Foreground="#B8C5D4" Text="--" TextTrimming="CharacterEllipsis" />
-          </StackPanel>
-          <TextBlock x:Name="FiveHourValue" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" FontFamily="Microsoft YaHei UI" FontSize="14" FontWeight="SemiBold" Foreground="#D7DEE7" Text="..." />
-          <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0,4,0,0" Width="200" Height="2" HorizontalAlignment="Left">
-            <Border Background="#33D7DEE7" CornerRadius="1" />
-            <Border x:Name="FiveHourProgressFill" Width="0" Height="2" HorizontalAlignment="Left" Background="#55D6A4" CornerRadius="1" Visibility="Collapsed" />
+        <Button x:Name="StylePickerButton"
+                Panel.ZIndex="10"
+                Width="76"
+                Height="19"
+                Margin="0,7,8,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Padding="5,0"
+                Background="#9E0B1018"
+                BorderBrush="#2DFFFFFF"
+                BorderThickness="1"
+                Foreground="#D9E3EF"
+                FontFamily="Bahnschrift, Microsoft YaHei UI"
+                FontSize="7"
+                Cursor="Hand"
+                Click="StylePickerButtonOnClick">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="10" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="StyleLabelText" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+            <TextBlock x:Name="StyleChevronText" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="8" Text="▾" />
           </Grid>
-        </Grid>
-
-        <Grid Grid.Row="1" Margin="0,4,0,0">
-          <Grid.RowDefinitions>
-            <RowDefinition Height="36" />
-            <RowDefinition Height="6" />
-          </Grid.RowDefinitions>
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-          <StackPanel Grid.Row="0" VerticalAlignment="Center">
-            <TextBlock FontFamily="Microsoft YaHei UI" FontSize="14" Foreground="#D9FFFFFF" Text="7天额度" />
-            <TextBlock x:Name="WeeklyResetValue" Margin="0,1,0,0" FontFamily="Microsoft YaHei UI" FontSize="12" Foreground="#B8C5D4" Text="--" TextTrimming="CharacterEllipsis" />
-          </StackPanel>
-          <TextBlock x:Name="WeeklyValue" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" FontFamily="Microsoft YaHei UI" FontSize="14" FontWeight="SemiBold" Foreground="#D7DEE7" Text="..." />
-          <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0,4,0,0" Width="200" Height="2" HorizontalAlignment="Left">
-            <Border Background="#33D7DEE7" CornerRadius="1" />
-            <Border x:Name="WeeklyProgressFill" Width="0" Height="2" HorizontalAlignment="Left" Background="#55D6A4" CornerRadius="1" Visibility="Collapsed" />
-          </Grid>
-        </Grid>
-
-        <Border Grid.Row="2" Margin="0,1,0,0" Background="#26FFFFFF" />
-
-        <Grid Grid.Row="3">
-          <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-          <TextBlock Style="{StaticResource TokenPeriodLabel}" Text="当日" />
-          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-            <TextBlock x:Name="TodayTotalValue" Style="{StaticResource TokenValue}" Foreground="#79C8FF" Text="..." />
-            <TextBlock x:Name="TodayPriceValue" Margin="5,0,0,0" Style="{StaticResource TokenValue}" Foreground="#78D6A5" Text="(约...)" />
-          </StackPanel>
-        </Grid>
-        <Grid Grid.Row="4">
-          <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-          <TextBlock Style="{StaticResource TokenPeriodLabel}" Text="近7天" />
-          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-            <TextBlock x:Name="SevenDayTotalValue" Style="{StaticResource TokenValue}" Foreground="#79C8FF" Text="..." />
-            <TextBlock x:Name="SevenDayPriceValue" Margin="5,0,0,0" Style="{StaticResource TokenValue}" Foreground="#78D6A5" Text="(约...)" />
-          </StackPanel>
-        </Grid>
-        <Grid Grid.Row="5">
-          <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-          <TextBlock Style="{StaticResource TokenPeriodLabel}" Text="近30天" />
-          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-            <TextBlock x:Name="ThirtyDayTotalValue" Style="{StaticResource TokenValue}" Foreground="#79C8FF" Text="..." />
-            <TextBlock x:Name="ThirtyDayPriceValue" Margin="5,0,0,0" Style="{StaticResource TokenValue}" Foreground="#78D6A5" Text="(约...)" />
-          </StackPanel>
-        </Grid>
-
-        <Grid Grid.Row="6" Margin="0,2,0,0">
-          <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-          <TextBlock x:Name="StatusValue" VerticalAlignment="Center" FontFamily="Microsoft YaHei UI" FontSize="10" Foreground="#B8D5E8" Text="正在连接 Codex…" TextTrimming="CharacterEllipsis" />
-          <TextBlock x:Name="TokenStatusValue" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Microsoft YaHei UI" FontSize="10" Foreground="#B8D5E8" Text="Loading…" TextTrimming="CharacterEllipsis" />
-        </Grid>
+        </Button>
       </Grid>
     </Border>
 
@@ -141,5 +90,66 @@
             VerticalAlignment="Top"
             Background="#B35E697A"
             CornerRadius="0,0,4,4" />
+
+    <Popup x:Name="StyleMenuPopup"
+           AllowsTransparency="True"
+           HorizontalOffset="-48"
+           Placement="Bottom"
+           PlacementTarget="{Binding ElementName=StylePickerButton}"
+           PopupAnimation="Fade"
+           StaysOpen="False"
+           VerticalOffset="4"
+           Closed="StyleMenuPopupOnClosed">
+      <Border Width="124"
+              Padding="4"
+              Background="#F018212E"
+              BorderBrush="#2AFFFFFF"
+              BorderThickness="1"
+              CornerRadius="9"
+              SnapsToDevicePixels="True">
+        <Border.Effect>
+          <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="4" Opacity="0.5" />
+        </Border.Effect>
+        <StackPanel>
+          <TextBlock Margin="7,3,0,3"
+                     FontFamily="Microsoft YaHei UI"
+                     FontSize="7"
+                     Foreground="#718096"
+                     Text="界面样式" />
+          <Button Tag="Instrument" Click="StyleOptionOnClick" Style="{StaticResource StyleOption}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition Width="10" /><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /></Grid.ColumnDefinitions>
+              <Ellipse Width="5" Height="5" VerticalAlignment="Center" Fill="#77D3DA" />
+              <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="精密仪表" />
+              <TextBlock x:Name="InstrumentCheck" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#65E1BA" Text="✓" />
+            </Grid>
+          </Button>
+          <Button Tag="Glass" Click="StyleOptionOnClick" Style="{StaticResource StyleOption}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition Width="10" /><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /></Grid.ColumnDefinitions>
+              <Ellipse Width="5" Height="5" VerticalAlignment="Center" Fill="#A9B8FF" />
+              <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="双层玻璃" />
+              <TextBlock x:Name="GlassCheck" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#65E1BA" Text="✓" />
+            </Grid>
+          </Button>
+          <Button Tag="Timeline" Click="StyleOptionOnClick" Style="{StaticResource StyleOption}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition Width="10" /><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /></Grid.ColumnDefinitions>
+              <Ellipse Width="5" Height="5" VerticalAlignment="Center" Fill="#668CA9" />
+              <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="横向时间轴" />
+              <TextBlock x:Name="TimelineCheck" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#65E1BA" Text="✓" />
+            </Grid>
+          </Button>
+          <Button Tag="Terminal" Click="StyleOptionOnClick" Style="{StaticResource StyleOption}">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition Width="10" /><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /></Grid.ColumnDefinitions>
+              <Ellipse Width="5" Height="5" VerticalAlignment="Center" Fill="#69D08F" />
+              <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="极简终端" />
+              <TextBlock x:Name="TerminalCheck" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#65E1BA" Text="✓" />
+            </Grid>
+          </Button>
+        </StackPanel>
+      </Border>
+    </Popup>
   </Grid>
 </Window>

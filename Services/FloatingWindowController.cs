@@ -16,6 +16,7 @@ public sealed class FloatingWindowController : IDisposable
     private readonly DispatcherTimer _collapseTimer;
     private readonly double _expandedTop;
     private int _animationVersion;
+    private bool _interactionLocked;
     private bool _disposed;
 
     public FloatingWindowController(Window window, Border card, Border hoverZone)
@@ -44,7 +45,7 @@ public sealed class FloatingWindowController : IDisposable
     {
         ThrowIfDisposed();
 
-        if (_card.IsMouseOver || _hoverZone.IsMouseOver)
+        if (_interactionLocked || _card.IsMouseOver || _hoverZone.IsMouseOver)
         {
             return;
         }
@@ -58,6 +59,18 @@ public sealed class FloatingWindowController : IDisposable
         if (!_disposed)
         {
             _collapseTimer.Stop();
+        }
+    }
+
+    public void SetInteractionLocked(bool isLocked)
+    {
+        ThrowIfDisposed();
+        _interactionLocked = isLocked;
+
+        if (isLocked)
+        {
+            CancelCollapse();
+            Expand();
         }
     }
 
@@ -91,7 +104,7 @@ public sealed class FloatingWindowController : IDisposable
     {
         _collapseTimer.Stop();
 
-        if (!_card.IsMouseOver && !_hoverZone.IsMouseOver)
+        if (!_interactionLocked && !_card.IsMouseOver && !_hoverZone.IsMouseOver)
         {
             AnimateTop(CollapsedTop);
         }

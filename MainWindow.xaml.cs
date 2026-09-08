@@ -2,16 +2,16 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using ShapePath = System.Windows.Shapes.Path;
 using System.Windows.Threading;
 using CodexQuotaFloat.Models;
 using CodexQuotaFloat.Services;
+using CodexQuotaFloat.Views;
 
 namespace CodexQuotaFloat;
 
 public partial class MainWindow : Window, IDisposable
 {
-    private const double QuotaProgressTrackWidth = 200;
-
     private static readonly TimeSpan[] ReconnectDelays =
     [
         TimeSpan.FromSeconds(3),
@@ -22,6 +22,7 @@ public partial class MainWindow : Window, IDisposable
     private readonly CodexAppServerClient _client = new();
     private readonly QuotaParser _quotaParser = new();
     private readonly LocalTokenUsageService _tokenUsageService = new();
+    private readonly AppearanceSettingsStore _appearanceSettingsStore = new();
     private readonly DispatcherTimer _refreshTimer;
     private readonly DispatcherTimer _tokenRefreshTimer;
     private readonly DispatcherTimer _reconnectTimer;
@@ -29,18 +30,33 @@ public partial class MainWindow : Window, IDisposable
     private readonly SemaphoreSlim _refreshGate = new(1, 1);
     private readonly SemaphoreSlim _tokenRefreshGate = new(1, 1);
     private readonly CancellationTokenSource _lifetimeCancellation = new();
+    private readonly IReadOnlyDictionary<FloatingStyleKind, FrameworkElement> _styleViews;
 
     private FloatingWindowController? _floatingWindowController;
+    private FloatingStyleKind _selectedStyle;
     private QuotaState _currentState = QuotaState.Loading();
     private QuotaState? _lastSuccessfulState;
     private TokenUsageState _tokenUsageState = TokenUsageState.Loading();
     private TokenUsageState? _lastSuccessfulTokenUsageState;
+    private string _quotaStatusMessage = "正在连接 Codex…";
+    private Brush _quotaStatusBrush = Brushes.Gainsboro;
+    private string _tokenStatusMessage = "Loading…";
+    private Brush _tokenStatusBrush = Brushes.Gainsboro;
     private int _reconnectAttempt;
     private bool _disposed;
 
     public MainWindow()
     {
         InitializeComponent();
+        _styleViews = new Dictionary<FloatingStyleKind, FrameworkElement>
+        {
+            [FloatingStyleKind.Instrument] = new InstrumentDashboard(),
+            [FloatingStyleKind.Glass] = new GlassDashboard(),
+            [FloatingStyleKind.Timeline] = new TimelineDashboard(),
+            [FloatingStyleKind.Terminal] = new TerminalDashboard()
+        };
+        _selectedStyle = _appearanceSettingsStore.Load();
+        ApplyStyle(_selectedStyle, savePreference: false);
 
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
         _refreshTimer.Tick += RefreshTimerOnTick;
@@ -131,6 +147,65 @@ public partial class MainWindow : Window, IDisposable
 
     private void ExitMenuItemOnClick(object sender, RoutedEventArgs e) => Close();
 
+    private void StylePickerButtonOnClick(object sender, RoutedEventArgs e)
+    {
+        var isOpen = !StyleMenuPopup.IsOpen;
+        StyleMenuPopup.IsOpen = isOpen;
+        StyleChevronText.Text = isOpen ? "▴" : "▾";
+        _floatingWindowController?.SetInteractionLocked(isOpen);
+    }
+
+    private void StyleMenuPopupOnClosed(object? sender, EventArgs e)
+    {
+        StyleChevronText.Text = "▾";
+        _floatingWindowController?.SetInteractionLocked(false);
+        _floatingWindowController?.ScheduleCollapse();
+    }
+
+    private void StyleOptionOnClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string tag } || !Enum.TryParse<FloatingStyleKind>(tag, out var style))
+        {
+            return;
+        }
+
+        ApplyStyle(style, savePreference: true);
+        StyleMenuPopup.IsOpen = false;
+    }
+
+    private void ApplyStyle(FloatingStyleKind style, bool savePreference)
+    {
+        _selectedStyle = style;
+        StyleContent.Content = _styleViews[style];
+        StyleLabelText.Text = GetStylePickerLabel(style);
+        SetStyleCheck(InstrumentCheck, style == FloatingStyleKind.Instrument);
+        SetStyleCheck(GlassCheck, style == FloatingStyleKind.Glass);
+        SetStyleCheck(TimelineCheck, style == FloatingStyleKind.Timeline);
+        SetStyleCheck(TerminalCheck, style == FloatingStyleKind.Terminal);
+
+        if (savePreference)
+        {
+            _appearanceSettingsStore.Save(style);
+        }
+
+        UpdateQuotaPresentation();
+        SetTokenUsageState(_tokenUsageState);
+        SetStatusText(_quotaStatusMessage, _quotaStatusBrush);
+        SetTokenStatus(_tokenStatusMessage, _tokenStatusBrush);
+    }
+
+    private static string GetStylePickerLabel(FloatingStyleKind style) => style switch
+    {
+        FloatingStyleKind.Instrument => "INSTRUMENT · A",
+        FloatingStyleKind.Glass => "GLASS · B",
+        FloatingStyleKind.Timeline => "TIMELINE · C",
+        FloatingStyleKind.Terminal => "TERMINAL · D",
+        _ => "GLASS · B"
+    };
+
+    private static void SetStyleCheck(TextBlock check, bool isSelected) =>
+        check.Visibility = isSelected ? Visibility.Visible : Visibility.Hidden;
+
     private async Task RefreshAsync()
     {
         if (_disposed || !_refreshGate.Wait(0))
@@ -174,8 +249,9 @@ public partial class MainWindow : Window, IDisposable
 
         try
         {
-            TokenStatusValue.Text = _lastSuccessfulTokenUsageState is null ? "Loading…" : "Refreshing…";
-            TokenStatusValue.Foreground = Brushes.LightSteelBlue;
+            SetTokenStatus(
+                _lastSuccessfulTokenUsageState is null ? "Loading…" : "Refreshing…",
+                Brushes.LightSteelBlue);
             var state = await Task.Run(
                 async () => await _tokenUsageService.ReadAsync(DateTimeOffset.Now, _lifetimeCancellation.Token),
                 _lifetimeCancellation.Token);
@@ -249,20 +325,33 @@ public partial class MainWindow : Window, IDisposable
 
     private void UpdateQuotaPresentation()
     {
-        FiveHourValue.Text = FormatQuota(_currentState.FiveHourRemaining, _currentState.Status);
-        WeeklyValue.Text = FormatQuota(_currentState.WeeklyRemaining, _currentState.Status);
-        FiveHourValue.Foreground = GetQuotaBrush(_currentState.FiveHourRemaining);
-        WeeklyValue.Foreground = GetQuotaBrush(_currentState.WeeklyRemaining);
-        UpdateQuotaProgress(FiveHourProgressFill, _currentState.FiveHourRemaining);
-        UpdateQuotaProgress(WeeklyProgressFill, _currentState.WeeklyRemaining);
+        SetStyleText("FiveHourValue", FormatQuota(_currentState.FiveHourRemaining, _currentState.Status));
+        SetStyleText("WeeklyValue", FormatQuota(_currentState.WeeklyRemaining, _currentState.Status));
+        SetStyleForeground("FiveHourValue", GetQuotaBrush(_currentState.FiveHourRemaining));
+        SetStyleForeground("WeeklyValue", GetQuotaBrush(_currentState.WeeklyRemaining));
+        UpdateQuotaProgress(
+            FindStyleElement<Border>("FiveHourProgressFill"),
+            _currentState.FiveHourRemaining,
+            GetQuotaProgressTrackWidth());
+        UpdateQuotaProgress(
+            FindStyleElement<Border>("WeeklyProgressFill"),
+            _currentState.WeeklyRemaining,
+            GetQuotaProgressTrackWidth());
+        UpdateQuotaGauge(FindStyleElement<ShapePath>("FiveHourGaugeArc"), _currentState.FiveHourRemaining);
+        UpdateQuotaGauge(FindStyleElement<ShapePath>("WeeklyGaugeArc"), _currentState.WeeklyRemaining);
 
         var now = DateTimeOffset.Now;
-        FiveHourResetValue.Text = QuotaPresentation.FormatResetCountdown(_currentState.FiveHourResetAt, now);
-        WeeklyResetValue.Text = QuotaPresentation.FormatResetCountdown(_currentState.WeeklyResetAt, now);
+        SetStyleText("FiveHourResetValue", QuotaPresentation.FormatResetCountdown(_currentState.FiveHourResetAt, now));
+        SetStyleText("WeeklyResetValue", QuotaPresentation.FormatResetCountdown(_currentState.WeeklyResetAt, now));
     }
 
-    private static void UpdateQuotaProgress(Border fill, int? remainingPercent)
+    private static void UpdateQuotaProgress(Border? fill, int? remainingPercent, double trackWidth)
     {
+        if (fill is null)
+        {
+            return;
+        }
+
         if (remainingPercent is not int value)
         {
             fill.Width = 0;
@@ -271,9 +360,36 @@ public partial class MainWindow : Window, IDisposable
         }
 
         fill.Visibility = Visibility.Visible;
-        fill.Width = QuotaProgressTrackWidth * Math.Clamp(value, 0, 100) / 100d;
+        fill.Width = trackWidth * Math.Clamp(value, 0, 100) / 100d;
         fill.Background = GetQuotaBrush(value);
     }
+
+    private static void UpdateQuotaGauge(ShapePath? gauge, int? remainingPercent)
+    {
+        if (gauge is null)
+        {
+            return;
+        }
+
+        if (remainingPercent is not int value)
+        {
+            gauge.Data = Geometry.Empty;
+            gauge.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        gauge.Visibility = Visibility.Visible;
+        gauge.Data = QuotaGaugeGeometry.CreateArc(value, 18);
+        gauge.Stroke = GetQuotaBrush(value);
+    }
+
+    private double GetQuotaProgressTrackWidth() => _selectedStyle switch
+    {
+        FloatingStyleKind.Glass => 112,
+        FloatingStyleKind.Timeline => 178,
+        FloatingStyleKind.Terminal => 154,
+        _ => 200
+    };
 
     private static Brush GetQuotaBrush(int? remainingPercent) => QuotaPresentation.GetColorBand(remainingPercent) switch
     {
@@ -287,32 +403,50 @@ public partial class MainWindow : Window, IDisposable
     private void SetTokenUsageState(TokenUsageState state)
     {
         _tokenUsageState = state;
-        SetTokenPeriod(TodayTotalValue, TodayPriceValue, state.Today, state.Status);
-        SetTokenPeriod(SevenDayTotalValue, SevenDayPriceValue, state.Last7Days, state.Status);
-        SetTokenPeriod(ThirtyDayTotalValue, ThirtyDayPriceValue, state.Last30Days, state.Status);
+        SetTokenPeriod(
+            FindStyleElement<TextBlock>("TodayTotalValue"),
+            FindStyleElement<TextBlock>("TodayPriceValue"),
+            state.Today,
+            state.Status);
+        SetTokenPeriod(
+            FindStyleElement<TextBlock>("SevenDayTotalValue"),
+            FindStyleElement<TextBlock>("SevenDayPriceValue"),
+            state.Last7Days,
+            state.Status);
+        SetTokenPeriod(
+            FindStyleElement<TextBlock>("ThirtyDayTotalValue"),
+            FindStyleElement<TextBlock>("ThirtyDayPriceValue"),
+            state.Last30Days,
+            state.Status);
 
-        TokenStatusValue.Text = state.Status switch
+        var statusMessage = state.Status switch
         {
             TokenUsageStatus.Loading => "Loading…",
             TokenUsageStatus.Ready when state.LastUpdatedAt is { } updated => $"Updated {updated.ToLocalTime():HH:mm:ss}",
             TokenUsageStatus.Stale => "Read failed · showing previous data",
             _ => "--"
         };
-        TokenStatusValue.Foreground = state.Status switch
+        var statusBrush = state.Status switch
         {
             TokenUsageStatus.Ready => Brushes.LightSteelBlue,
             TokenUsageStatus.Stale => Brushes.Khaki,
             TokenUsageStatus.Offline => Brushes.LightCoral,
             _ => Brushes.Gainsboro
         };
+        SetTokenStatus(statusMessage, statusBrush);
     }
 
     private static void SetTokenPeriod(
-        TextBlock totalText,
-        TextBlock priceText,
+        TextBlock? totalText,
+        TextBlock? priceText,
         TokenUsagePeriod period,
         TokenUsageStatus status)
     {
+        if (totalText is null || priceText is null)
+        {
+            return;
+        }
+
         var placeholder = status == TokenUsageStatus.Loading ? "..." : "--";
         var totalTokens = period.InputTokens + period.OutputTokens;
         totalText.Text = status is TokenUsageStatus.Ready or TokenUsageStatus.Stale
@@ -331,8 +465,40 @@ public partial class MainWindow : Window, IDisposable
 
     private void SetStatusText(string message, Brush foreground)
     {
-        StatusValue.Text = message;
-        StatusValue.Foreground = foreground;
+        _quotaStatusMessage = message;
+        _quotaStatusBrush = foreground;
+        SetStyleText("StatusValue", message);
+        SetStyleForeground("StatusValue", foreground);
+    }
+
+    private void SetTokenStatus(string message, Brush foreground)
+    {
+        _tokenStatusMessage = message;
+        _tokenStatusBrush = foreground;
+        SetStyleText("TokenStatusValue", message);
+        SetStyleForeground("TokenStatusValue", foreground);
+    }
+
+    private T? FindStyleElement<T>(string name)
+        where T : FrameworkElement =>
+        _styleViews[_selectedStyle].FindName(name) as T;
+
+    private void SetStyleText(string name, string text)
+    {
+        var element = FindStyleElement<TextBlock>(name);
+        if (element is not null)
+        {
+            element.Text = text;
+        }
+    }
+
+    private void SetStyleForeground(string name, Brush foreground)
+    {
+        var element = FindStyleElement<TextBlock>(name);
+        if (element is not null)
+        {
+            element.Foreground = foreground;
+        }
     }
 
     private static string GetDefaultStatusMessage(QuotaState state) => state.Status switch
