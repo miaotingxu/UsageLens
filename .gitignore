@@ -1,9 +1,39 @@
-# For projects that use the Waf build system: https://waf.io/
-# Dot-hidden on Unix-like systems
+# .NET / Visual Studio build outputs
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Test, coverage and local tooling outputs
+TestResults/
+coverage/
+*.coverage
+.superpowers/
+
+# NuGet and generated packages
+packages/
+*.nupkg
+*.snupkg
+
+# Publish artifacts (keep only the local final folder; do not commit generated binaries)
+release-*/
+publish/
+dist/
+artifacts/
+
+# Logs and OS/editor metadata
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+
+# Waf leftovers (not used by this project, but harmless if generated)
 .waf-*-*/
 .waf3-*-*/
-# Hidden directory on Windows (no dot)
 waf-*-*/
 waf3-*-*/
-# Lockfile
 .lock-waf_*_build

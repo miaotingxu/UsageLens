@@ -1,0 +1,271 @@
+using System.IO;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Threading;
+using CodexQuotaFloat.Models;
+using CodexQuotaFloat.Services;
+
+namespace CodexQuotaFloat;
+
+public partial class MainWindow : Window, IDisposable
+{
+    private const double QuotaProgressTrackWidth = 200;
+
+    private static readonly TimeSpan[] ReconnectDelays =
+    [
+        TimeSpan.FromSeconds(3),
+        TimeSpan.FromSeconds(10),
+        TimeSpan.FromSeconds(30)
+    ];
+
+    private readonly CodexAppServerClient _client = new();
+    private readonly QuotaParser _quotaParser = new();
+    private readonly DispatcherTimer _refreshTimer;
+    private readonly DispatcherTimer _reconnectTimer;
+    private readonly DispatcherTimer _countdownTimer;
+    private readonly SemaphoreSlim _refreshGate = new(1, 1);
+    private readonly CancellationTokenSource _lifetimeCancellation = new();
+
+    private FloatingWindowController? _floatingWindowController;
+    private QuotaState _currentState = QuotaState.Loading();
+    private QuotaState? _lastSuccessfulState;
+    private int _reconnectAttempt;
+    private bool _disposed;
+
+    public MainWindow()
+    {
+        InitializeComponent();
+
+        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
+        _refreshTimer.Tick += RefreshTimerOnTick;
+
+        _reconnectTimer = new DispatcherTimer();
+        _reconnectTimer.Tick += ReconnectTimerOnTick;
+
+        _countdownTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
+        _countdownTimer.Tick += CountdownTimerOnTick;
+
+        _client.Exited += ClientOnExited;
+        SetQuotaState(_currentState);
+    }
+
+    public void SetQuotaState(QuotaState state, string? statusMessage = null)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            _ = Dispatcher.InvokeAsync(() => SetQuotaState(state, statusMessage));
+            return;
+        }
+
+        _currentState = state;
+        UpdateQuotaPresentation();
+        SetStatusText(statusMessage ?? GetDefaultStatusMessage(state), GetStatusBrush(state.Status));
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        _refreshTimer.Stop();
+        _reconnectTimer.Stop();
+        _countdownTimer.Stop();
+        _refreshTimer.Tick -= RefreshTimerOnTick;
+        _reconnectTimer.Tick -= ReconnectTimerOnTick;
+        _countdownTimer.Tick -= CountdownTimerOnTick;
+        _lifetimeCancellation.Cancel();
+        _client.Exited -= ClientOnExited;
+        _floatingWindowController?.Dispose();
+        _client.Dispose();
+    }
+
+    private async void WindowOnLoaded(object sender, RoutedEventArgs e)
+    {
+        PositionOnPrimaryScreen();
+        _floatingWindowController = new FloatingWindowController(this, Card, HoverZone);
+        _refreshTimer.Start();
+        _countdownTimer.Start();
+        await RefreshAsync();
+    }
+
+    private void WindowOnClosed(object? sender, EventArgs e)
+    {
+        Dispose();
+
+        if (!Application.Current.Dispatcher.HasShutdownStarted)
+        {
+            Application.Current.Shutdown();
+        }
+    }
+
+    private async void RefreshTimerOnTick(object? sender, EventArgs e) => await RefreshAsync();
+
+    private async void ReconnectTimerOnTick(object? sender, EventArgs e)
+    {
+        _reconnectTimer.Stop();
+        await RefreshAsync();
+    }
+
+    private void CountdownTimerOnTick(object? sender, EventArgs e) => UpdateQuotaPresentation();
+
+    private async void RefreshMenuItemOnClick(object sender, RoutedEventArgs e) => await RefreshAsync();
+
+    private void ExitMenuItemOnClick(object sender, RoutedEventArgs e) => Close();
+
+    private async Task RefreshAsync()
+    {
+        if (_disposed || !_refreshGate.Wait(0))
+        {
+            return;
+        }
+
+        try
+        {
+            SetStatusText(
+                _lastSuccessfulState is null ? "正在连接 Codex…" : "正在刷新 Codex 额度…",
+                Brushes.LightSteelBlue);
+            var result = await _client.ReadRateLimitsAsync(_lifetimeCancellation.Token);
+            var state = _quotaParser.Parse(result, DateTimeOffset.Now);
+
+            _lastSuccessfulState = state;
+            _reconnectAttempt = 0;
+            _reconnectTimer.Stop();
+            SetQuotaState(state);
+        }
+        catch (OperationCanceledException) when (_lifetimeCancellation.IsCancellationRequested)
+        {
+            // 应用正在退出，无需改变界面状态。
+        }
+        catch (Exception exception)
+        {
+            ApplyRefreshFailure(GetFriendlyFailureMessage(exception));
+        }
+        finally
+        {
+            _refreshGate.Release();
+        }
+    }
+
+    private void ClientOnExited(object? sender, EventArgs e)
+    {
+        if (_disposed || Dispatcher.HasShutdownStarted)
+        {
+            return;
+        }
+
+        _ = Dispatcher.InvokeAsync(() =>
+        {
+            if (!_disposed)
+            {
+                ApplyRefreshFailure("Codex App Server 已退出，正在重新连接…");
+            }
+        });
+    }
+
+    private void ApplyRefreshFailure(string? statusMessage = null)
+    {
+        SetQuotaState(
+            _lastSuccessfulState?.MarkStale() ?? QuotaState.Offline(),
+            statusMessage ?? "无法读取额度，请确认 Codex 已登录；正在重试…");
+        ScheduleReconnect();
+    }
+
+    private void ScheduleReconnect()
+    {
+        if (_disposed || _reconnectTimer.IsEnabled)
+        {
+            return;
+        }
+
+        var delayIndex = Math.Min(_reconnectAttempt, ReconnectDelays.Length - 1);
+        _reconnectTimer.Interval = ReconnectDelays[delayIndex];
+        _reconnectAttempt = Math.Min(_reconnectAttempt + 1, ReconnectDelays.Length - 1);
+        _reconnectTimer.Start();
+    }
+
+    private void PositionOnPrimaryScreen()
+    {
+        var workArea = SystemParameters.WorkArea;
+        Left = workArea.Left + (workArea.Width - Width) / 2;
+        Top = workArea.Top;
+    }
+
+    private static string FormatQuota(int? remainingPercent, QuotaStatus status) =>
+        remainingPercent is int value
+            ? $"{value}%"
+            : status == QuotaStatus.Loading
+                ? "..."
+                : "--";
+
+    private void UpdateQuotaPresentation()
+    {
+        FiveHourValue.Text = FormatQuota(_currentState.FiveHourRemaining, _currentState.Status);
+        WeeklyValue.Text = FormatQuota(_currentState.WeeklyRemaining, _currentState.Status);
+        FiveHourValue.Foreground = GetQuotaBrush(_currentState.FiveHourRemaining);
+        WeeklyValue.Foreground = GetQuotaBrush(_currentState.WeeklyRemaining);
+        UpdateQuotaProgress(FiveHourProgressFill, _currentState.FiveHourRemaining);
+        UpdateQuotaProgress(WeeklyProgressFill, _currentState.WeeklyRemaining);
+
+        var now = DateTimeOffset.Now;
+        FiveHourResetValue.Text = QuotaPresentation.FormatResetCountdown(_currentState.FiveHourResetAt, now);
+        WeeklyResetValue.Text = QuotaPresentation.FormatResetCountdown(_currentState.WeeklyResetAt, now);
+    }
+
+    private static void UpdateQuotaProgress(Border fill, int? remainingPercent)
+    {
+        if (remainingPercent is not int value)
+        {
+            fill.Width = 0;
+            fill.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        fill.Visibility = Visibility.Visible;
+        fill.Width = QuotaProgressTrackWidth * Math.Clamp(value, 0, 100) / 100d;
+        fill.Background = GetQuotaBrush(value);
+    }
+
+    private static Brush GetQuotaBrush(int? remainingPercent) => QuotaPresentation.GetColorBand(remainingPercent) switch
+    {
+        QuotaColorBand.Green => new SolidColorBrush(Color.FromRgb(0x55, 0xD6, 0xA4)),
+        QuotaColorBand.Yellow => new SolidColorBrush(Color.FromRgb(0xF7, 0xDE, 0x6B)),
+        QuotaColorBand.Amber => new SolidColorBrush(Color.FromRgb(0xF2, 0xB8, 0x5D)),
+        QuotaColorBand.Red => new SolidColorBrush(Color.FromRgb(0xFF, 0x7C, 0x74)),
+        _ => new SolidColorBrush(Color.FromRgb(0xD7, 0xDE, 0xE7))
+    };
+
+    private void SetStatusText(string message, Brush foreground)
+    {
+        StatusValue.Text = message;
+        StatusValue.Foreground = foreground;
+    }
+
+    private static string GetDefaultStatusMessage(QuotaState state) => state.Status switch
+    {
+        QuotaStatus.Loading => "正在连接 Codex…",
+        QuotaStatus.Ready when state.LastUpdatedAt is { } updated =>
+            $"已更新 {updated.ToLocalTime():HH:mm:ss}",
+        QuotaStatus.Ready => "已更新",
+        QuotaStatus.Stale => "读取失败，正在保留上次数据并重试…",
+        _ => "无法读取额度，请确认 Codex 已登录；正在重试…"
+    };
+
+    private static Brush GetStatusBrush(QuotaStatus status) => status switch
+    {
+        QuotaStatus.Ready => Brushes.LightSteelBlue,
+        QuotaStatus.Stale => Brushes.Khaki,
+        QuotaStatus.Offline => Brushes.LightCoral,
+        _ => Brushes.Gainsboro
+    };
+
+    private static string GetFriendlyFailureMessage(Exception exception) => exception switch
+    {
+        FileNotFoundException => "未检测到 Codex.exe，请确认已安装 Codex",
+        UnauthorizedAccessException => "无权启动 Codex，请检查 Codex 安装状态",
+        _ => "无法读取额度，请确认 Codex 已登录；正在重试…"
+    };
+}
