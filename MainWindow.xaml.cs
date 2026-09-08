@@ -329,18 +329,6 @@ public partial class MainWindow : Window, IDisposable
         priceText.ToolTip = tooltip;
     }
 
-    private void QuotaPageButtonOnClick(object sender, RoutedEventArgs e) => ShowTokenPage(showTokenPage: false);
-
-    private void TokenPageButtonOnClick(object sender, RoutedEventArgs e) => ShowTokenPage(showTokenPage: true);
-
-    private void ShowTokenPage(bool showTokenPage)
-    {
-        QuotaPage.Visibility = showTokenPage ? Visibility.Collapsed : Visibility.Visible;
-        TokenPage.Visibility = showTokenPage ? Visibility.Visible : Visibility.Collapsed;
-        QuotaPageDot.Fill = new SolidColorBrush(Color.FromArgb(showTokenPage ? (byte)0x55 : (byte)0xD9, 0xFF, 0xFF, 0xFF));
-        TokenPageDot.Fill = new SolidColorBrush(Color.FromArgb(showTokenPage ? (byte)0xD9 : (byte)0x55, 0xFF, 0xFF, 0xFF));
-    }
-
     private void SetStatusText(string message, Brush foreground)
     {
         StatusValue.Text = message;
