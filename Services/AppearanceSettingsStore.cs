@@ -14,33 +14,39 @@ public sealed class AppearanceSettingsStore
         "CodexQuotaFloat",
         "appearance.json");
 
-    public FloatingStyleKind Load()
+    public FloatingWindowAppearance Load()
     {
         try
         {
             if (!File.Exists(SettingsPath))
             {
-                return FloatingStyleKind.Glass;
+                return FloatingWindowAppearance.Default;
             }
 
             var settings = JsonSerializer.Deserialize<AppearanceSettings>(File.ReadAllText(SettingsPath));
             return settings is not null && Enum.IsDefined(settings.Style)
-                ? settings.Style
-                : FloatingStyleKind.Glass;
+                ? new FloatingWindowAppearance(
+                    settings.Style,
+                    IsFinite(settings.Left) ? settings.Left : null,
+                    IsFinite(settings.Top) ? settings.Top : null)
+                : FloatingWindowAppearance.Default;
         }
         catch
         {
-            return FloatingStyleKind.Glass;
+            return FloatingWindowAppearance.Default;
         }
     }
 
-    public void Save(FloatingStyleKind style)
+    public void Save(FloatingStyleKind style, double left, double top)
     {
         try
         {
             var directory = Path.GetDirectoryName(SettingsPath)!;
             Directory.CreateDirectory(directory);
-            var json = JsonSerializer.Serialize(new AppearanceSettings(style));
+            var json = JsonSerializer.Serialize(new AppearanceSettings(
+                style,
+                IsFinite(left) ? left : null,
+                IsFinite(top) ? top : null));
             File.WriteAllText(SettingsPath, json);
         }
         catch
@@ -49,5 +55,12 @@ public sealed class AppearanceSettingsStore
         }
     }
 
-    private sealed record AppearanceSettings(FloatingStyleKind Style);
+    private static bool IsFinite(double? value) => value is double number && double.IsFinite(number);
+
+    private sealed record AppearanceSettings(FloatingStyleKind Style, double? Left, double? Top);
+}
+
+public sealed record FloatingWindowAppearance(FloatingStyleKind Style, double? Left, double? Top)
+{
+    public static FloatingWindowAppearance Default { get; } = new(FloatingStyleKind.Glass, null, null);
 }

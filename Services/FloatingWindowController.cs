@@ -16,9 +16,11 @@ public sealed class FloatingWindowController : IDisposable
     private readonly Action<bool>? _setCardShadowVisible;
     private readonly Action<bool>? _setNavigationVisible;
     private readonly DispatcherTimer _collapseTimer;
-    private readonly double _expandedTop;
+    private double _expandedLeft;
+    private double _expandedTop;
     private int _animationVersion;
     private bool _interactionLocked;
+    private bool _isDragging;
     private bool _disposed;
 
     public FloatingWindowController(
@@ -33,6 +35,7 @@ public sealed class FloatingWindowController : IDisposable
         _hoverZone = hoverZone;
         _setCardShadowVisible = setCardShadowVisible;
         _setNavigationVisible = setNavigationVisible;
+        _expandedLeft = window.Left;
         _expandedTop = window.Top;
         _collapseTimer = new DispatcherTimer { Interval = CollapseDelay };
 
@@ -54,7 +57,7 @@ public sealed class FloatingWindowController : IDisposable
     {
         ThrowIfDisposed();
 
-        if (_interactionLocked || _card.IsMouseOver || _hoverZone.IsMouseOver)
+        if (_interactionLocked || _isDragging || _card.IsMouseOver || _hoverZone.IsMouseOver)
         {
             return;
         }
@@ -82,6 +85,33 @@ public sealed class FloatingWindowController : IDisposable
             Expand();
         }
     }
+
+    public void BeginUserDrag()
+    {
+        ThrowIfDisposed();
+        _isDragging = true;
+        CancelCollapse();
+        _setCardShadowVisible?.Invoke(true);
+        _setNavigationVisible?.Invoke(true);
+        _window.BeginAnimation(Window.TopProperty, null);
+        _window.Top = _expandedTop;
+    }
+
+    public void CompleteUserDrag()
+    {
+        ThrowIfDisposed();
+        _window.BeginAnimation(Window.TopProperty, null);
+        _expandedLeft = _window.Left;
+        _expandedTop = _window.Top;
+        _isDragging = false;
+
+        if (!_interactionLocked && !_card.IsMouseOver && !_hoverZone.IsMouseOver)
+        {
+            ScheduleCollapse();
+        }
+    }
+
+    public Point ExpandedPosition => new(_expandedLeft, _expandedTop);
 
     public void Dispose()
     {
@@ -113,7 +143,7 @@ public sealed class FloatingWindowController : IDisposable
     {
         _collapseTimer.Stop();
 
-        if (!_interactionLocked && !_card.IsMouseOver && !_hoverZone.IsMouseOver)
+        if (!_interactionLocked && !_isDragging && !_card.IsMouseOver && !_hoverZone.IsMouseOver)
         {
             AnimateTop(CollapsedTop);
         }

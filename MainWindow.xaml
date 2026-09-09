@@ -78,6 +78,9 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Top"
             Background="Transparent"
+            Cursor="SizeAll"
+            ToolTip="按住左键拖动悬浮窗"
+            PreviewMouseLeftButtonDown="DragSurfaceOnPreviewMouseLeftButtonDown"
             SnapsToDevicePixels="True">
       <Grid>
         <ContentControl x:Name="StyleContent" />
@@ -113,6 +116,9 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Top"
             Background="#B35E697A"
-            CornerRadius="0,0,4,4" />
+            CornerRadius="0,0,4,4"
+            Cursor="SizeAll"
+            ToolTip="按住左键拖动悬浮窗"
+            PreviewMouseLeftButtonDown="DragSurfaceOnPreviewMouseLeftButtonDown" />
   </Grid>
 </Window>

@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using ShapePath = System.Windows.Shapes.Path;
 using System.Windows.Threading;
@@ -50,6 +51,8 @@ public partial class MainWindow : Window, IDisposable
     private Brush _quotaStatusBrush = Brushes.Gainsboro;
     private string _tokenStatusMessage = "Loading…";
     private Brush _tokenStatusBrush = Brushes.Gainsboro;
+    private double? _savedWindowLeft;
+    private double? _savedWindowTop;
     private int _reconnectAttempt;
     private bool _disposed;
 
@@ -63,7 +66,10 @@ public partial class MainWindow : Window, IDisposable
             [FloatingStyleKind.Timeline] = new TimelineDashboard(),
             [FloatingStyleKind.Terminal] = new TerminalDashboard()
         };
-        _selectedStyle = _appearanceSettingsStore.Load();
+        var appearance = _appearanceSettingsStore.Load();
+        _selectedStyle = appearance.Style;
+        _savedWindowLeft = appearance.Left;
+        _savedWindowTop = appearance.Top;
         ApplyStyle(_selectedStyle, savePreference: false);
 
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
@@ -135,6 +141,7 @@ public partial class MainWindow : Window, IDisposable
 
     private void WindowOnClosed(object? sender, EventArgs e)
     {
+        SaveAppearance();
         Dispose();
 
         if (!Application.Current.Dispatcher.HasShutdownStarted)
@@ -181,6 +188,31 @@ public partial class MainWindow : Window, IDisposable
         _floatingWindowController?.ScheduleCollapse();
     }
 
+    private void DragSurfaceOnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton != MouseButton.Left)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        _floatingWindowController?.BeginUserDrag();
+
+        try
+        {
+            DragMove();
+        }
+        catch (InvalidOperationException)
+        {
+            // 鼠标状态在拖拽开始前变化时，WPF 会拒绝启动原生拖动。
+        }
+        finally
+        {
+            _floatingWindowController?.CompleteUserDrag();
+            SaveAppearance();
+        }
+    }
+
     private void CycleStyle(int direction)
     {
         var currentIndex = Array.IndexOf(StyleOrder, _selectedStyle);
@@ -207,7 +239,7 @@ public partial class MainWindow : Window, IDisposable
 
         if (savePreference)
         {
-            _appearanceSettingsStore.Save(style);
+            SaveAppearance();
         }
 
         UpdateQuotaPresentation();
@@ -360,9 +392,48 @@ public partial class MainWindow : Window, IDisposable
 
     private void PositionOnPrimaryScreen()
     {
+        if (HasVisibleSavedWindowPosition())
+        {
+            Left = _savedWindowLeft!.Value;
+            Top = _savedWindowTop!.Value;
+            return;
+        }
+
         var workArea = SystemParameters.WorkArea;
         Left = workArea.Left + (workArea.Width - Width) / 2;
         Top = workArea.Top;
+    }
+
+    private void SaveAppearance()
+    {
+        var position = _floatingWindowController?.ExpandedPosition;
+        var left = position?.X ?? Left;
+        var top = position?.Y ?? Top;
+
+        _savedWindowLeft = left;
+        _savedWindowTop = top;
+        _appearanceSettingsStore.Save(_selectedStyle, left, top);
+    }
+
+    private bool HasVisibleSavedWindowPosition()
+    {
+        if (_savedWindowLeft is not double left || _savedWindowTop is not double top ||
+            !double.IsFinite(left) || !double.IsFinite(top))
+        {
+            return false;
+        }
+
+        var virtualLeft = SystemParameters.VirtualScreenLeft;
+        var virtualTop = SystemParameters.VirtualScreenTop;
+        var virtualRight = virtualLeft + SystemParameters.VirtualScreenWidth;
+        var virtualBottom = virtualTop + SystemParameters.VirtualScreenHeight;
+        const double minimumVisibleWidth = 80;
+        const double minimumVisibleHeight = 8;
+
+        return left + minimumVisibleWidth >= virtualLeft &&
+               left <= virtualRight - minimumVisibleWidth &&
+               top + minimumVisibleHeight >= virtualTop &&
+               top <= virtualBottom - minimumVisibleHeight;
     }
 
     private static string FormatQuota(int? remainingPercent, QuotaStatus status) =>
