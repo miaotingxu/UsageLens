@@ -113,7 +113,11 @@ public partial class MainWindow : Window, IDisposable
     private async void WindowOnLoaded(object sender, RoutedEventArgs e)
     {
         PositionOnPrimaryScreen();
-        _floatingWindowController = new FloatingWindowController(this, Card, HoverZone);
+        _floatingWindowController = new FloatingWindowController(
+            this,
+            Card,
+            HoverZone,
+            SetSelectedDashboardShadowVisible);
         _refreshTimer.Start();
         _tokenRefreshTimer.Start();
         _countdownTimer.Start();
@@ -215,6 +219,14 @@ public partial class MainWindow : Window, IDisposable
 
     private static void SetStyleCheck(TextBlock check, bool isSelected) =>
         check.Visibility = isSelected ? Visibility.Visible : Visibility.Hidden;
+
+    private void SetSelectedDashboardShadowVisible(bool isVisible)
+    {
+        if (_styleViews[_selectedStyle] is ICollapsibleDashboard dashboard)
+        {
+            dashboard.SetCardShadowVisible(isVisible);
+        }
+    }
 
     private async Task RefreshAsync()
     {

@@ -5,7 +5,8 @@
              Height="195"
              UseLayoutRounding="True"
              TextOptions.TextFormattingMode="Display">
-  <Border BorderBrush="#3DFFFFFF"
+  <Border x:Name="DashboardCard"
+          BorderBrush="#3DFFFFFF"
           BorderThickness="1"
           CornerRadius="0,0,16,16"
           SnapsToDevicePixels="True">

@@ -13,17 +13,23 @@ public sealed class FloatingWindowController : IDisposable
     private readonly Window _window;
     private readonly Border _card;
     private readonly Border _hoverZone;
+    private readonly Action<bool>? _setCardShadowVisible;
     private readonly DispatcherTimer _collapseTimer;
     private readonly double _expandedTop;
     private int _animationVersion;
     private bool _interactionLocked;
     private bool _disposed;
 
-    public FloatingWindowController(Window window, Border card, Border hoverZone)
+    public FloatingWindowController(
+        Window window,
+        Border card,
+        Border hoverZone,
+        Action<bool>? setCardShadowVisible = null)
     {
         _window = window;
         _card = card;
         _hoverZone = hoverZone;
+        _setCardShadowVisible = setCardShadowVisible;
         _expandedTop = window.Top;
         _collapseTimer = new DispatcherTimer { Interval = CollapseDelay };
 
@@ -112,6 +118,8 @@ public sealed class FloatingWindowController : IDisposable
 
     private void AnimateTop(double targetTop)
     {
+        _setCardShadowVisible?.Invoke(targetTop >= _expandedTop - 0.01);
+
         var currentTop = _window.Top;
         _window.BeginAnimation(Window.TopProperty, null);
         _window.Top = currentTop;
