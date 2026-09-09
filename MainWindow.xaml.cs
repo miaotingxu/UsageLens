@@ -177,7 +177,8 @@ public partial class MainWindow : Window, IDisposable
     {
         _selectedStyle = style;
         StyleContent.Content = _styleViews[style];
-        StyleLabelText.Text = GetStylePickerLabel(style);
+        StyleLabelText.Text = GetStylePickerShortLabel(style);
+        StylePickerButton.ToolTip = $"当前样式：{GetStylePickerLabel(style)}\n点击切换界面样式";
         SetStyleCheck(InstrumentCheck, style == FloatingStyleKind.Instrument);
         SetStyleCheck(GlassCheck, style == FloatingStyleKind.Glass);
         SetStyleCheck(TimelineCheck, style == FloatingStyleKind.Timeline);
@@ -201,6 +202,15 @@ public partial class MainWindow : Window, IDisposable
         FloatingStyleKind.Timeline => "TIMELINE · C",
         FloatingStyleKind.Terminal => "TERMINAL · D",
         _ => "GLASS · B"
+    };
+
+    private static string GetStylePickerShortLabel(FloatingStyleKind style) => style switch
+    {
+        FloatingStyleKind.Instrument => "A",
+        FloatingStyleKind.Glass => "B",
+        FloatingStyleKind.Timeline => "C",
+        FloatingStyleKind.Terminal => "D",
+        _ => "B"
     };
 
     private static void SetStyleCheck(TextBlock check, bool isSelected) =>

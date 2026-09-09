@@ -53,34 +53,40 @@
             SnapsToDevicePixels="True">
       <Grid>
         <ContentControl x:Name="StyleContent" />
-
-        <Button x:Name="StylePickerButton"
-                Panel.ZIndex="10"
-                Width="76"
-                Height="19"
-                Margin="0,7,8,0"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Padding="5,0"
-                Background="#9E0B1018"
-                BorderBrush="#2DFFFFFF"
-                BorderThickness="1"
-                Foreground="#D9E3EF"
-                FontFamily="Bahnschrift, Microsoft YaHei UI"
-                FontSize="7"
-                Cursor="Hand"
-                Click="StylePickerButtonOnClick">
-          <Grid>
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" />
-              <ColumnDefinition Width="10" />
-            </Grid.ColumnDefinitions>
-            <TextBlock x:Name="StyleLabelText" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-            <TextBlock x:Name="StyleChevronText" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="8" Text="▾" />
-          </Grid>
-        </Button>
       </Grid>
     </Border>
+
+    <!-- 独立于四套内容置顶，避免切换入口压住右上角数据。 -->
+    <Button x:Name="StylePickerButton"
+            Panel.ZIndex="100"
+            Width="24"
+            Height="18"
+            Margin="0,5,6,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Padding="0"
+            Background="#E00B1018"
+            BorderBrush="#45FFFFFF"
+            BorderThickness="1"
+            Foreground="#D9E3EF"
+            FontFamily="Bahnschrift, Microsoft YaHei UI"
+            FontSize="8"
+            Cursor="Hand"
+            ToolTip="切换界面样式"
+            Click="StylePickerButtonOnClick">
+      <Grid>
+        <TextBlock x:Name="StyleLabelText"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   TextAlignment="Center" />
+        <TextBlock x:Name="StyleChevronText"
+                   Margin="0,0,2,0"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center"
+                   FontSize="7"
+                   Text="▾" />
+      </Grid>
+    </Button>
 
     <Border x:Name="HoverZone"
             Width="80"
@@ -93,7 +99,7 @@
 
     <Popup x:Name="StyleMenuPopup"
            AllowsTransparency="True"
-           HorizontalOffset="-48"
+           HorizontalOffset="-102"
            Placement="Bottom"
            PlacementTarget="{Binding ElementName=StylePickerButton}"
            PopupAnimation="Fade"
