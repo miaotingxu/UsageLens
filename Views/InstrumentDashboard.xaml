@@ -50,9 +50,9 @@
             <ColumnDefinition Width="46" />
             <ColumnDefinition Width="*" />
           </Grid.ColumnDefinitions>
-          <Grid Width="42" Height="42" VerticalAlignment="Center">
-            <Ellipse Width="36" Height="36" Stroke="#25FFFFFF" StrokeThickness="3" />
-            <Path x:Name="FiveHourGaugeArc" Width="36" Height="36" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" StrokeThickness="3" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+          <Grid Width="46" Height="46" VerticalAlignment="Center">
+            <Ellipse Width="40" Height="40" Stroke="#25FFFFFF" StrokeThickness="3" />
+            <Path x:Name="FiveHourGaugeArc" Width="42" Height="42" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" StrokeThickness="3" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
             <TextBlock x:Name="FiveHourValue" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas" FontSize="10" FontWeight="Bold" Foreground="#D7DEE7" Text="..." />
           </Grid>
           <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -66,9 +66,9 @@
             <ColumnDefinition Width="46" />
             <ColumnDefinition Width="*" />
           </Grid.ColumnDefinitions>
-          <Grid Width="42" Height="42" VerticalAlignment="Center">
-            <Ellipse Width="36" Height="36" Stroke="#25FFFFFF" StrokeThickness="3" />
-            <Path x:Name="WeeklyGaugeArc" Width="36" Height="36" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" StrokeThickness="3" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+          <Grid Width="46" Height="46" VerticalAlignment="Center">
+            <Ellipse Width="40" Height="40" Stroke="#25FFFFFF" StrokeThickness="3" />
+            <Path x:Name="WeeklyGaugeArc" Width="42" Height="42" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="None" StrokeThickness="3" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
             <TextBlock x:Name="WeeklyValue" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas" FontSize="10" FontWeight="Bold" Foreground="#D7DEE7" Text="..." />
           </Grid>
           <StackPanel Grid.Column="1" VerticalAlignment="Center">

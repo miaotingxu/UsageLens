@@ -12,6 +12,14 @@ namespace CodexQuotaFloat;
 
 public partial class MainWindow : Window, IDisposable
 {
+    private static readonly FloatingStyleKind[] StyleOrder =
+    [
+        FloatingStyleKind.Instrument,
+        FloatingStyleKind.Glass,
+        FloatingStyleKind.Timeline,
+        FloatingStyleKind.Terminal
+    ];
+
     private static readonly TimeSpan[] ReconnectDelays =
     [
         TimeSpan.FromSeconds(3),
@@ -117,7 +125,8 @@ public partial class MainWindow : Window, IDisposable
             this,
             Card,
             HoverZone,
-            SetSelectedDashboardShadowVisible);
+            SetSelectedDashboardShadowVisible,
+            SetStyleNavigationVisible);
         _refreshTimer.Start();
         _tokenRefreshTimer.Start();
         _countdownTimer.Start();
@@ -151,42 +160,50 @@ public partial class MainWindow : Window, IDisposable
 
     private void ExitMenuItemOnClick(object sender, RoutedEventArgs e) => Close();
 
-    private void StylePickerButtonOnClick(object sender, RoutedEventArgs e)
+    private void PreviousStyleButtonOnClick(object sender, RoutedEventArgs e)
     {
-        var isOpen = !StyleMenuPopup.IsOpen;
-        StyleMenuPopup.IsOpen = isOpen;
-        StyleChevronText.Text = isOpen ? "▴" : "▾";
-        _floatingWindowController?.SetInteractionLocked(isOpen);
+        CycleStyle(-1);
     }
 
-    private void StyleMenuPopupOnClosed(object? sender, EventArgs e)
+    private void NextStyleButtonOnClick(object sender, RoutedEventArgs e)
     {
-        StyleChevronText.Text = "▾";
+        CycleStyle(1);
+    }
+
+    private void StyleNavigationOnMouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        _floatingWindowController?.SetInteractionLocked(true);
+    }
+
+    private void StyleNavigationOnMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+    {
         _floatingWindowController?.SetInteractionLocked(false);
         _floatingWindowController?.ScheduleCollapse();
     }
 
-    private void StyleOptionOnClick(object sender, RoutedEventArgs e)
+    private void CycleStyle(int direction)
     {
-        if (sender is not Button { Tag: string tag } || !Enum.TryParse<FloatingStyleKind>(tag, out var style))
+        var currentIndex = Array.IndexOf(StyleOrder, _selectedStyle);
+        if (currentIndex < 0)
         {
-            return;
+            currentIndex = 0;
         }
 
-        ApplyStyle(style, savePreference: true);
-        StyleMenuPopup.IsOpen = false;
+        var nextIndex = (currentIndex + direction) % StyleOrder.Length;
+        if (nextIndex < 0)
+        {
+            nextIndex += StyleOrder.Length;
+        }
+
+        ApplyStyle(StyleOrder[nextIndex], savePreference: true);
     }
 
     private void ApplyStyle(FloatingStyleKind style, bool savePreference)
     {
         _selectedStyle = style;
         StyleContent.Content = _styleViews[style];
-        StyleLabelText.Text = GetStylePickerShortLabel(style);
-        StylePickerButton.ToolTip = $"当前样式：{GetStylePickerLabel(style)}\n点击切换界面样式";
-        SetStyleCheck(InstrumentCheck, style == FloatingStyleKind.Instrument);
-        SetStyleCheck(GlassCheck, style == FloatingStyleKind.Glass);
-        SetStyleCheck(TimelineCheck, style == FloatingStyleKind.Timeline);
-        SetStyleCheck(TerminalCheck, style == FloatingStyleKind.Terminal);
+        PreviousStyleButton.ToolTip = $"上一套：{GetStylePickerLabel(GetAdjacentStyle(-1))}";
+        NextStyleButton.ToolTip = $"下一套：{GetStylePickerLabel(GetAdjacentStyle(1))}";
 
         if (savePreference)
         {
@@ -199,6 +216,23 @@ public partial class MainWindow : Window, IDisposable
         SetTokenStatus(_tokenStatusMessage, _tokenStatusBrush);
     }
 
+    private FloatingStyleKind GetAdjacentStyle(int direction)
+    {
+        var currentIndex = Array.IndexOf(StyleOrder, _selectedStyle);
+        if (currentIndex < 0)
+        {
+            currentIndex = 0;
+        }
+
+        var nextIndex = (currentIndex + direction) % StyleOrder.Length;
+        if (nextIndex < 0)
+        {
+            nextIndex += StyleOrder.Length;
+        }
+
+        return StyleOrder[nextIndex];
+    }
+
     private static string GetStylePickerLabel(FloatingStyleKind style) => style switch
     {
         FloatingStyleKind.Instrument => "INSTRUMENT · A",
@@ -208,17 +242,10 @@ public partial class MainWindow : Window, IDisposable
         _ => "GLASS · B"
     };
 
-    private static string GetStylePickerShortLabel(FloatingStyleKind style) => style switch
+    private void SetStyleNavigationVisible(bool isVisible)
     {
-        FloatingStyleKind.Instrument => "A",
-        FloatingStyleKind.Glass => "B",
-        FloatingStyleKind.Timeline => "C",
-        FloatingStyleKind.Terminal => "D",
-        _ => "B"
-    };
-
-    private static void SetStyleCheck(TextBlock check, bool isSelected) =>
-        check.Visibility = isSelected ? Visibility.Visible : Visibility.Hidden;
+        StyleNavigation.Visibility = isVisible ? Visibility.Visible : Visibility.Hidden;
+    }
 
     private void SetSelectedDashboardShadowVisible(bool isVisible)
     {
@@ -401,7 +428,7 @@ public partial class MainWindow : Window, IDisposable
         }
 
         gauge.Visibility = Visibility.Visible;
-        gauge.Data = QuotaGaugeGeometry.CreateArc(value, 18);
+        gauge.Data = QuotaGaugeGeometry.CreateArc(value, 20);
         gauge.Stroke = GetQuotaBrush(value);
     }
 
