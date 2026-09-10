@@ -130,8 +130,8 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
           </Grid.ColumnDefinitions>
-          <TextBlock x:Name="StatusValue" VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas" FontSize="8" Foreground="#8295A8" Text="正在连接 Codex…" TextTrimming="CharacterEllipsis" />
-          <TextBlock x:Name="TokenStatusValue" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas" FontSize="8" Foreground="#8295A8" Text="Loading…" TextTrimming="CharacterEllipsis" />
+          <TextBlock x:Name="StatusValue" VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas" FontSize="9" Foreground="#8295A8" Text="正在连接 Codex…" TextTrimming="CharacterEllipsis" />
+          <TextBlock x:Name="TokenStatusValue" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas" FontSize="9" Foreground="#8295A8" Text="Loading…" TextTrimming="CharacterEllipsis" />
         </Grid>
       </Grid>
     </Grid>
