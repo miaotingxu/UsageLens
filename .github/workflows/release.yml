@@ -1,0 +1,45 @@
+name: Release portable app
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build portable package
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME -replace '^v', ''
+          .\scripts\package-release.ps1 -Version $version
+
+      - name: Create GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $archive = Get-ChildItem -LiteralPath .\artifacts -Filter '*.zip' -File -ErrorAction Stop
+          if ($archive.Count -ne 1) {
+            throw "Expected exactly one ZIP artifact, found $($archive.Count)."
+          }
+          $checksum = (Resolve-Path -LiteralPath .\artifacts\SHA256SUMS.txt).Path
+          gh release create $env:GITHUB_REF_NAME `
+            $archive.FullName `
+            $checksum `
+            --generate-notes `
+            --verify-tag `
+            --title $env:GITHUB_REF_NAME
