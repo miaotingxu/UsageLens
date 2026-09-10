@@ -19,11 +19,26 @@ AssertEqual($"<1m · {now.ToLocalTime().AddSeconds(59):MM/dd HH:mm}", QuotaPrese
 AssertEqual($"<1m · {now.ToLocalTime().AddSeconds(-1):MM/dd HH:mm}", QuotaPresentation.FormatResetCountdown(now.AddSeconds(-1), now));
 AssertEqual("--", QuotaPresentation.FormatResetCountdown(null, now));
 
+AssertNear(824, HorizontalWindowPlacement.ResolveInitialLeft(null, 0, 2000, 352));
+AssertNear(0, HorizontalWindowPlacement.ClampLeft(-50, 0, 2000, 352));
+AssertNear(1648, HorizontalWindowPlacement.ClampLeft(1900, 0, 2000, 352));
+AssertNear(640, HorizontalWindowPlacement.ResolveInitialLeft(640, 0, 2000, 352));
+AssertNear(824, HorizontalWindowPlacement.ResolveInitialLeft(double.NaN, 0, 2000, 352));
+AssertNear(-1920, HorizontalWindowPlacement.ClampLeft(-2100, -1920, 1920, 352));
+
 Console.WriteLine("QuotaPresentation tests passed.");
 
 static void AssertEqual<T>(T expected, T actual)
 {
     if (!EqualityComparer<T>.Default.Equals(expected, actual))
+    {
+        throw new InvalidOperationException($"Expected '{expected}', got '{actual}'.");
+    }
+}
+
+static void AssertNear(double expected, double actual)
+{
+    if (Math.Abs(expected - actual) > 0.001)
     {
         throw new InvalidOperationException($"Expected '{expected}', got '{actual}'.");
     }

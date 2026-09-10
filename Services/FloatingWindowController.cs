@@ -86,10 +86,11 @@ public sealed class FloatingWindowController : IDisposable
         }
     }
 
-    public void BeginUserDrag()
+    public void BeginUserDrag(double expandedTop)
     {
         ThrowIfDisposed();
         _isDragging = true;
+        _expandedTop = expandedTop;
         CancelCollapse();
         _setCardShadowVisible?.Invoke(true);
         _setNavigationVisible?.Invoke(true);
@@ -97,12 +98,14 @@ public sealed class FloatingWindowController : IDisposable
         _window.Top = _expandedTop;
     }
 
-    public void CompleteUserDrag()
+    public void CompleteUserDrag(double expandedLeft, double expandedTop)
     {
         ThrowIfDisposed();
         _window.BeginAnimation(Window.TopProperty, null);
-        _expandedLeft = _window.Left;
-        _expandedTop = _window.Top;
+        _expandedLeft = expandedLeft;
+        _expandedTop = expandedTop;
+        _window.Left = expandedLeft;
+        _window.Top = expandedTop;
         _isDragging = false;
 
         if (!_interactionLocked && !_card.IsMouseOver && !_hoverZone.IsMouseOver)

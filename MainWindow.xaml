@@ -13,6 +13,9 @@
         ShowInTaskbar="False"
         Loaded="WindowOnLoaded"
         Closed="WindowOnClosed"
+        PreviewMouseMove="WindowOnPreviewMouseMove"
+        PreviewMouseLeftButtonUp="WindowOnPreviewMouseLeftButtonUp"
+        LostMouseCapture="WindowOnLostMouseCapture"
         UseLayoutRounding="True"
         TextOptions.TextFormattingMode="Display">
   <Window.ContextMenu>
@@ -78,8 +81,8 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Top"
             Background="Transparent"
-            Cursor="SizeAll"
-            ToolTip="按住左键拖动悬浮窗"
+            Cursor="SizeWE"
+            ToolTip="按住左键左右拖动悬浮窗"
             PreviewMouseLeftButtonDown="DragSurfaceOnPreviewMouseLeftButtonDown"
             SnapsToDevicePixels="True">
       <Grid>
@@ -117,8 +120,8 @@
             VerticalAlignment="Top"
             Background="#B35E697A"
             CornerRadius="0,0,4,4"
-            Cursor="SizeAll"
-            ToolTip="按住左键拖动悬浮窗"
+            Cursor="SizeWE"
+            ToolTip="按住左键左右拖动悬浮窗"
             PreviewMouseLeftButtonDown="DragSurfaceOnPreviewMouseLeftButtonDown" />
   </Grid>
 </Window>

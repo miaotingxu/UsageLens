@@ -23,12 +23,11 @@ public sealed class AppearanceSettingsStore
                 return FloatingWindowAppearance.Default;
             }
 
-            var settings = JsonSerializer.Deserialize<AppearanceSettings>(File.ReadAllText(SettingsPath));
+            var settings = JsonSerializer.Deserialize<StoredAppearanceSettings>(File.ReadAllText(SettingsPath));
             return settings is not null && Enum.IsDefined(settings.Style)
                 ? new FloatingWindowAppearance(
                     settings.Style,
-                    IsFinite(settings.Left) ? settings.Left : null,
-                    IsFinite(settings.Top) ? settings.Top : null)
+                    IsFinite(settings.Left) ? settings.Left : null)
                 : FloatingWindowAppearance.Default;
         }
         catch
@@ -37,16 +36,15 @@ public sealed class AppearanceSettingsStore
         }
     }
 
-    public void Save(FloatingStyleKind style, double left, double top)
+    public void Save(FloatingStyleKind style, double left)
     {
         try
         {
             var directory = Path.GetDirectoryName(SettingsPath)!;
             Directory.CreateDirectory(directory);
-            var json = JsonSerializer.Serialize(new AppearanceSettings(
+            var json = JsonSerializer.Serialize(new WritableAppearanceSettings(
                 style,
-                IsFinite(left) ? left : null,
-                IsFinite(top) ? top : null));
+                IsFinite(left) ? left : null));
             File.WriteAllText(SettingsPath, json);
         }
         catch
@@ -57,10 +55,12 @@ public sealed class AppearanceSettingsStore
 
     private static bool IsFinite(double? value) => value is double number && double.IsFinite(number);
 
-    private sealed record AppearanceSettings(FloatingStyleKind Style, double? Left, double? Top);
+    private sealed record StoredAppearanceSettings(FloatingStyleKind Style, double? Left, double? Top);
+
+    private sealed record WritableAppearanceSettings(FloatingStyleKind Style, double? Left);
 }
 
-public sealed record FloatingWindowAppearance(FloatingStyleKind Style, double? Left, double? Top)
+public sealed record FloatingWindowAppearance(FloatingStyleKind Style, double? Left)
 {
-    public static FloatingWindowAppearance Default { get; } = new(FloatingStyleKind.Glass, null, null);
+    public static FloatingWindowAppearance Default { get; } = new(FloatingStyleKind.Glass, null);
 }

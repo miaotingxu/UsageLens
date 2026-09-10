@@ -52,7 +52,9 @@ public partial class MainWindow : Window, IDisposable
     private string _tokenStatusMessage = "Loading…";
     private Brush _tokenStatusBrush = Brushes.Gainsboro;
     private double? _savedWindowLeft;
-    private double? _savedWindowTop;
+    private bool _isHorizontalDragging;
+    private double _dragStartMouseScreenX;
+    private double _dragStartWindowLeft;
     private int _reconnectAttempt;
     private bool _disposed;
 
@@ -69,7 +71,6 @@ public partial class MainWindow : Window, IDisposable
         var appearance = _appearanceSettingsStore.Load();
         _selectedStyle = appearance.Style;
         _savedWindowLeft = appearance.Left;
-        _savedWindowTop = appearance.Top;
         ApplyStyle(_selectedStyle, savePreference: false);
 
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
@@ -190,27 +191,90 @@ public partial class MainWindow : Window, IDisposable
 
     private void DragSurfaceOnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.ChangedButton != MouseButton.Left)
+        if (e.ChangedButton != MouseButton.Left || _isHorizontalDragging)
         {
             return;
         }
 
         e.Handled = true;
-        _floatingWindowController?.BeginUserDrag();
+        var workArea = SystemParameters.WorkArea;
+        _dragStartMouseScreenX = GetMouseScreenX(e);
+        _dragStartWindowLeft = Left;
+        _isHorizontalDragging = true;
+        _floatingWindowController?.BeginUserDrag(workArea.Top);
+        Top = workArea.Top;
 
-        try
+        if (!Mouse.Capture(this, CaptureMode.Element))
         {
-            DragMove();
+            CompleteHorizontalDrag(releaseMouseCapture: false);
         }
-        catch (InvalidOperationException)
+    }
+
+    private void WindowOnPreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (!_isHorizontalDragging)
         {
-            // 鼠标状态在拖拽开始前变化时，WPF 会拒绝启动原生拖动。
+            return;
         }
-        finally
+
+        if (e.LeftButton != MouseButtonState.Pressed)
         {
-            _floatingWindowController?.CompleteUserDrag();
-            SaveAppearance();
+            CompleteHorizontalDrag();
+            return;
         }
+
+        var workArea = SystemParameters.WorkArea;
+        var requestedLeft = _dragStartWindowLeft + GetMouseScreenX(e) - _dragStartMouseScreenX;
+        Left = HorizontalWindowPlacement.ClampLeft(requestedLeft, workArea.Left, workArea.Width, Width);
+        Top = workArea.Top;
+        e.Handled = true;
+    }
+
+    private void WindowOnPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (!_isHorizontalDragging || e.ChangedButton != MouseButton.Left)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        CompleteHorizontalDrag();
+    }
+
+    private void WindowOnLostMouseCapture(object sender, MouseEventArgs e)
+    {
+        if (_isHorizontalDragging)
+        {
+            CompleteHorizontalDrag(releaseMouseCapture: false);
+        }
+    }
+
+    private void CompleteHorizontalDrag(bool releaseMouseCapture = true)
+    {
+        if (!_isHorizontalDragging)
+        {
+            return;
+        }
+
+        _isHorizontalDragging = false;
+        var workArea = SystemParameters.WorkArea;
+        Left = HorizontalWindowPlacement.ClampLeft(Left, workArea.Left, workArea.Width, Width);
+        Top = workArea.Top;
+        _floatingWindowController?.CompleteUserDrag(Left, Top);
+        SaveAppearance();
+
+        if (releaseMouseCapture && Mouse.Captured == this)
+        {
+            Mouse.Capture(null);
+        }
+    }
+
+    private double GetMouseScreenX(MouseEventArgs e)
+    {
+        var screenPoint = PointToScreen(e.GetPosition(this));
+        var presentationSource = PresentationSource.FromVisual(this);
+        return presentationSource?.CompositionTarget?.TransformFromDevice.Transform(screenPoint).X
+               ?? screenPoint.X;
     }
 
     private void CycleStyle(int direction)
@@ -392,15 +456,12 @@ public partial class MainWindow : Window, IDisposable
 
     private void PositionOnPrimaryScreen()
     {
-        if (HasVisibleSavedWindowPosition())
-        {
-            Left = _savedWindowLeft!.Value;
-            Top = _savedWindowTop!.Value;
-            return;
-        }
-
         var workArea = SystemParameters.WorkArea;
-        Left = workArea.Left + (workArea.Width - Width) / 2;
+        Left = HorizontalWindowPlacement.ResolveInitialLeft(
+            _savedWindowLeft,
+            workArea.Left,
+            workArea.Width,
+            Width);
         Top = workArea.Top;
     }
 
@@ -408,32 +469,9 @@ public partial class MainWindow : Window, IDisposable
     {
         var position = _floatingWindowController?.ExpandedPosition;
         var left = position?.X ?? Left;
-        var top = position?.Y ?? Top;
 
         _savedWindowLeft = left;
-        _savedWindowTop = top;
-        _appearanceSettingsStore.Save(_selectedStyle, left, top);
-    }
-
-    private bool HasVisibleSavedWindowPosition()
-    {
-        if (_savedWindowLeft is not double left || _savedWindowTop is not double top ||
-            !double.IsFinite(left) || !double.IsFinite(top))
-        {
-            return false;
-        }
-
-        var virtualLeft = SystemParameters.VirtualScreenLeft;
-        var virtualTop = SystemParameters.VirtualScreenTop;
-        var virtualRight = virtualLeft + SystemParameters.VirtualScreenWidth;
-        var virtualBottom = virtualTop + SystemParameters.VirtualScreenHeight;
-        const double minimumVisibleWidth = 80;
-        const double minimumVisibleHeight = 8;
-
-        return left + minimumVisibleWidth >= virtualLeft &&
-               left <= virtualRight - minimumVisibleWidth &&
-               top + minimumVisibleHeight >= virtualTop &&
-               top <= virtualBottom - minimumVisibleHeight;
+        _appearanceSettingsStore.Save(_selectedStyle, left);
     }
 
     private static string FormatQuota(int? remainingPercent, QuotaStatus status) =>
