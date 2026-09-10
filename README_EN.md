@@ -33,6 +33,8 @@ The widget stays attached to the primary screen's top edge and can only be dragg
 
 The current release includes Instrument, Glass, Timeline, and Terminal styles. Use the arrows on either side of the window to cycle through them; only the visual presentation changes.
 
+![CodexQuotaFloat four interface styles](assets/screenshots/ui-overview.png)
+
 ## Download and install
 
 Download `CodexQuotaFloat-v{version}-win-x64-portable.zip` from [Releases](https://github.com/miaotingxu/CodexQuotaFloat/releases/latest).
