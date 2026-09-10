@@ -131,7 +131,7 @@ dotnet run --project .\tests\UsageLens.PresentationTests\UsageLens.PresentationT
 Build the portable package:
 
 ```powershell
-.\scripts\package-release.ps1 -Version 1.3.1
+.\scripts\package-release.ps1 -Version 1.0.1
 ```
 
 ## Roadmap

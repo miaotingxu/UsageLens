@@ -4,7 +4,7 @@
 
 ## [Unreleased]
 
-## [1.3.1] - 2026-09-10
+## [1.0.1] - 2026-09-10
 
 ### Changed
 
@@ -24,6 +24,6 @@
 - 单实例、手动刷新、自动重连与读取失败时保留最近结果。
 - Windows x64 自包含单文件便携包和 SHA256 校验文件。
 
-[Unreleased]: https://github.com/miaotingxu/UsageLens/compare/v1.3.1...HEAD
-[1.3.1]: https://github.com/miaotingxu/UsageLens/releases/tag/v1.3.1
+[Unreleased]: https://github.com/miaotingxu/UsageLens/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/miaotingxu/UsageLens/releases/tag/v1.0.1
 [1.3.0]: https://github.com/miaotingxu/UsageLens/releases/tag/v1.3.0
