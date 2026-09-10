@@ -35,6 +35,8 @@
 
 当前版本内置四套界面，可通过窗口两侧箭头循环切换：Instrument、Glass、Timeline 和 Terminal。它们共享额度、Token、刷新、倒计时和折叠逻辑，只改变视觉呈现。
 
+![CodexQuotaFloat four interface styles](assets/screenshots/ui-overview.png)
+
 ## 下载与安装
 
 从 [Releases](https://github.com/miaotingxu/CodexQuotaFloat/releases/latest) 下载 `CodexQuotaFloat-v{版本号}-win-x64-portable.zip`。
