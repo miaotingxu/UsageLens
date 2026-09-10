@@ -1,4 +1,4 @@
-namespace CodexQuotaFloat.Services;
+namespace UsageLens.Services;
 
 public enum QuotaColorBand
 {

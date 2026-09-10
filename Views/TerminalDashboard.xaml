@@ -1,4 +1,4 @@
-<UserControl x:Class="CodexQuotaFloat.Views.TerminalDashboard"
+<UserControl x:Class="UsageLens.Views.TerminalDashboard"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Width="300"
@@ -39,7 +39,7 @@
       </Grid.RowDefinitions>
 
       <Grid Grid.Row="0">
-        <TextBlock Style="{StaticResource TermText}" FontSize="7" Foreground="#628B70" Text="CODEX_QUOTA_FLOAT" />
+        <TextBlock Style="{StaticResource TermText}" FontSize="7" Foreground="#628B70" Text="USAGE_LENS" />
         <TextBlock HorizontalAlignment="Right" Style="{StaticResource TermText}" FontSize="7" Foreground="#69D08F" Text="ONLINE" />
       </Grid>
 

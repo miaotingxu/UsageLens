@@ -1,4 +1,4 @@
-<UserControl x:Class="CodexQuotaFloat.Views.TimelineDashboard"
+<UserControl x:Class="UsageLens.Views.TimelineDashboard"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Width="300"
@@ -36,7 +36,7 @@
       </Grid.RowDefinitions>
 
       <Grid Grid.Row="0">
-        <TextBlock Style="{StaticResource TimelineText}" FontSize="9" FontWeight="SemiBold" Text="CODEX QUOTA" />
+        <TextBlock Style="{StaticResource TimelineText}" FontSize="9" FontWeight="SemiBold" Text="USAGE LENS" />
         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" VerticalAlignment="Top">
           <Ellipse Width="5" Height="5" Margin="0,3,4,0" Fill="#55D6A4">
             <Ellipse.Effect><DropShadowEffect Color="#55D6A4" BlurRadius="7" Opacity="0.8" /></Ellipse.Effect>

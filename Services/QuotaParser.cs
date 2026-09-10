@@ -1,7 +1,7 @@
 using System.Text.Json;
-using CodexQuotaFloat.Models;
+using UsageLens.Models;
 
-namespace CodexQuotaFloat.Services;
+namespace UsageLens.Services;
 
 public sealed class QuotaParser
 {

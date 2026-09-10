@@ -1,21 +1,21 @@
 <div align="center">
 
-# CodexQuotaFloat
+# UsageLens
 
 ### A lightweight, always-on-top Windows widget for Codex usage monitoring
 
 [简体中文](README.md) · [English](README_EN.md)
 
-[![Release](https://img.shields.io/github/v/release/miaotingxu/CodexQuotaFloat?display_name=tag&sort=semver)](https://github.com/miaotingxu/CodexQuotaFloat/releases/latest) [![License](https://img.shields.io/github/license/miaotingxu/CodexQuotaFloat)](LICENSE) ![Windows](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4)
+[![Release](https://img.shields.io/github/v/release/miaotingxu/UsageLens?display_name=tag&sort=semver)](https://github.com/miaotingxu/UsageLens/releases/latest) [![License](https://img.shields.io/github/license/miaotingxu/UsageLens)](LICENSE) ![Windows](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4)
 
-[Download latest release](https://github.com/miaotingxu/CodexQuotaFloat/releases/latest) · [Quick start](#quick-start) · [简体中文](README.md)
+[Download latest release](https://github.com/miaotingxu/UsageLens/releases/latest) · [Quick start](#quick-start) · [简体中文](README.md)
 
 Track Codex rate limits, reset countdowns, local token usage, and estimated costs.  
 No extra login, no API key, and local session data stays on your computer.
 
 </div>
 
-## Why CodexQuotaFloat
+## Why UsageLens
 
 ### Know your quota at a glance
 
@@ -33,15 +33,15 @@ The widget stays attached to the primary screen's top edge and can only be dragg
 
 The current release includes Instrument, Glass, Timeline, and Terminal styles. Use the arrows on either side of the window to cycle through them; only the visual presentation changes.
 
-![CodexQuotaFloat four interface styles](assets/screenshots/ui-overview.png)
+![UsageLens four interface styles](assets/screenshots/ui-overview.png)
 
 ## Download and install
 
-Download `CodexQuotaFloat-v{version}-win-x64-portable.zip` from [Releases](https://github.com/miaotingxu/CodexQuotaFloat/releases/latest).
+Download `UsageLens-v{version}-win-x64-portable.zip` from [Releases](https://github.com/miaotingxu/UsageLens/releases/latest).
 
-This is a Windows x64 portable package. Extract it and run `CodexQuotaFloat.exe`; no separate .NET Runtime installation is required.
+This is a Windows x64 portable package. Extract it and run `UsageLens.exe`; no separate .NET Runtime installation is required.
 
-> Codex must already be installed and signed in on this computer. CodexQuotaFloat reuses Codex's existing local login state to read quota data.
+> Codex must already be installed and signed in on this computer. UsageLens reuses Codex's existing local login state to read quota data.
 
 ## Requirements
 
@@ -56,7 +56,7 @@ This is a Windows x64 portable package. Extract it and run `CodexQuotaFloat.exe`
 
 1. Download the Portable ZIP from the latest Release.
 2. Extract all files to a folder; do not run the executable from inside the archive.
-3. Double-click `CodexQuotaFloat.exe`.
+3. Double-click `UsageLens.exe`.
 
 ## Controls
 
@@ -69,7 +69,8 @@ This is a Windows x64 portable package. Extract it and run `CodexQuotaFloat.exe`
 | Right-click → Refresh | Refresh quota and token usage |
 | Right-click → Exit | Close the application |
 
-The selected style and horizontal position are stored in `%LOCALAPPDATA%\CodexQuotaFloat\appearance.json`. It contains only the style and window X coordinate, not account, quota, or session data.
+The selected style and horizontal position are stored in `%LOCALAPPDATA%\UsageLens\appearance.json`. It contains only the style and window X coordinate, not account, quota, or session data.
+On first launch, if the new path has no valid settings, the app migrates the style and horizontal position from `%LOCALAPPDATA%\CodexQuotaFloat\appearance.json`; the legacy directory is never deleted.
 
 ## Data and privacy
 
@@ -99,7 +100,7 @@ Tokens from unlisted models are excluded from the estimate. A trailing `*` indic
 
 ### The window is not visible
 
-Check the very top edge of the screen for the collapsed handle and move the pointer onto it. You can also close an existing `CodexQuotaFloat.exe` process and start it again. Delete `%LOCALAPPDATA%\CodexQuotaFloat\appearance.json` to reset style and position.
+Check the very top edge of the screen for the collapsed handle and move the pointer onto it. You can also close an existing `UsageLens.exe` process and start it again. Delete `%LOCALAPPDATA%\UsageLens\appearance.json` to reset style and position.
 
 ### Quota shows `--`
 
@@ -114,23 +115,23 @@ This means no readable Codex session metadata was found for the last 30 local ca
 Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
 
 ```powershell
-git clone https://github.com/miaotingxu/CodexQuotaFloat.git
-cd CodexQuotaFloat
-dotnet build .\CodexQuotaFloat.csproj -c Release
-dotnet run --project .\CodexQuotaFloat.csproj
+git clone https://github.com/miaotingxu/UsageLens.git
+cd UsageLens
+dotnet build .\UsageLens.csproj -c Release
+dotnet run --project .\UsageLens.csproj
 ```
 
 Run tests:
 
 ```powershell
-dotnet run --project .\tests\CodexQuotaFloat.TokenUsageTests\CodexQuotaFloat.TokenUsageTests.csproj -c Release
-dotnet run --project .\tests\CodexQuotaFloat.PresentationTests\CodexQuotaFloat.PresentationTests.csproj -c Release
+dotnet run --project .\tests\UsageLens.TokenUsageTests\UsageLens.TokenUsageTests.csproj -c Release
+dotnet run --project .\tests\UsageLens.PresentationTests\UsageLens.PresentationTests.csproj -c Release
 ```
 
 Build the portable package:
 
 ```powershell
-.\scripts\package-release.ps1 -Version 1.3.0
+.\scripts\package-release.ps1 -Version 1.3.1
 ```
 
 ## Roadmap

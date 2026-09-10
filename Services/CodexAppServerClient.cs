@@ -4,7 +4,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace CodexQuotaFloat.Services;
+namespace UsageLens.Services;
 
 public sealed class CodexAppServerClient : IDisposable
 {
@@ -72,9 +72,9 @@ public sealed class CodexAppServerClient : IDisposable
                     {
                         clientInfo = new
                         {
-                            name = "codex_quota_float",
-                            title = "Codex Quota Float",
-                            version = "0.1.0"
+                            name = "usage_lens",
+                            title = "UsageLens",
+                            version = "1.3.1"
                         }
                     },
                     cancellationToken);

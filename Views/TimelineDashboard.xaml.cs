@@ -1,7 +1,7 @@
 using System.Windows.Controls;
 using System.Windows.Media.Effects;
 
-namespace CodexQuotaFloat.Views;
+namespace UsageLens.Views;
 
 public partial class TimelineDashboard : UserControl, ICollapsibleDashboard
 {

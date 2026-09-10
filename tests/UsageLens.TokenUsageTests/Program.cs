@@ -1,5 +1,5 @@
 using System.Text.Json;
-using CodexQuotaFloat.Services;
+using UsageLens.Services;
 
 if (args.Contains("--real", StringComparer.OrdinalIgnoreCase))
 {
@@ -8,7 +8,7 @@ if (args.Contains("--real", StringComparer.OrdinalIgnoreCase))
     return;
 }
 
-var root = Path.Combine(Path.GetTempPath(), $"CodexQuotaFloat-tests-{Guid.NewGuid():N}");
+var root = Path.Combine(Path.GetTempPath(), $"UsageLens-tests-{Guid.NewGuid():N}");
 Directory.CreateDirectory(root);
 
 try

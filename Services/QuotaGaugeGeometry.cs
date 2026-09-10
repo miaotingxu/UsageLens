@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Media;
 
-namespace CodexQuotaFloat.Services;
+namespace UsageLens.Services;
 
 public static class QuotaGaugeGeometry
 {
