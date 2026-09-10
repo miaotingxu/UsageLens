@@ -65,7 +65,7 @@
               <TextBlock Style="{StaticResource QuotaTitle}" Text="5小时" />
               <TextBlock x:Name="FiveHourValue" HorizontalAlignment="Right" FontFamily="Bahnschrift" FontSize="16" FontWeight="SemiBold" Foreground="#D7DEE7" Text="..." />
             </Grid>
-            <TextBlock x:Name="FiveHourResetValue" Grid.Row="1" VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas" FontSize="8" Foreground="#8795A7" Text="--" TextTrimming="CharacterEllipsis" />
+            <TextBlock x:Name="FiveHourResetValue" Grid.Row="1" VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas" FontSize="9" Foreground="#8795A7" Text="--" TextTrimming="CharacterEllipsis" />
             <Grid Grid.Row="2" Width="112" Height="2" HorizontalAlignment="Left" VerticalAlignment="Bottom">
               <Border Background="#2ED7DEE7" CornerRadius="1" />
               <Border x:Name="FiveHourProgressFill" Width="0" Height="2" HorizontalAlignment="Left" Background="#55D6A4" CornerRadius="1" Visibility="Collapsed" />
@@ -90,7 +90,7 @@
               <TextBlock Style="{StaticResource QuotaTitle}" Text="7天额度" />
               <TextBlock x:Name="WeeklyValue" HorizontalAlignment="Right" FontFamily="Bahnschrift" FontSize="16" FontWeight="SemiBold" Foreground="#D7DEE7" Text="..." />
             </Grid>
-            <TextBlock x:Name="WeeklyResetValue" Grid.Row="1" VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas" FontSize="8" Foreground="#8795A7" Text="--" TextTrimming="CharacterEllipsis" />
+            <TextBlock x:Name="WeeklyResetValue" Grid.Row="1" VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas" FontSize="9" Foreground="#8795A7" Text="--" TextTrimming="CharacterEllipsis" />
             <Grid Grid.Row="2" Width="112" Height="2" HorizontalAlignment="Left" VerticalAlignment="Bottom">
               <Border Background="#2ED7DEE7" CornerRadius="1" />
               <Border x:Name="WeeklyProgressFill" Width="0" Height="2" HorizontalAlignment="Left" Background="#55D6A4" CornerRadius="1" Visibility="Collapsed" />

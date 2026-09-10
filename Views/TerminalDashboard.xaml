@@ -55,7 +55,7 @@
           <Grid.RowDefinitions><RowDefinition Height="17" /><RowDefinition Height="8" /></Grid.RowDefinitions>
           <StackPanel Orientation="Horizontal">
             <TextBlock Style="{StaticResource TermText}" FontSize="7" Foreground="#617067" Text="RESET  " />
-            <TextBlock x:Name="FiveHourResetValue" Style="{StaticResource TermText}" FontSize="7" Foreground="#829389" Text="--" TextTrimming="CharacterEllipsis" />
+            <TextBlock x:Name="FiveHourResetValue" Style="{StaticResource TermText}" FontSize="9" Foreground="#829389" Text="--" TextTrimming="CharacterEllipsis" />
           </StackPanel>
           <Grid Grid.Row="1" Width="154" Height="2" HorizontalAlignment="Left">
             <Border Background="#2869D08F" />
@@ -76,7 +76,7 @@
           <Grid.RowDefinitions><RowDefinition Height="17" /><RowDefinition Height="8" /></Grid.RowDefinitions>
           <StackPanel Orientation="Horizontal">
             <TextBlock Style="{StaticResource TermText}" FontSize="7" Foreground="#617067" Text="RESET  " />
-            <TextBlock x:Name="WeeklyResetValue" Style="{StaticResource TermText}" FontSize="7" Foreground="#829389" Text="--" TextTrimming="CharacterEllipsis" />
+            <TextBlock x:Name="WeeklyResetValue" Style="{StaticResource TermText}" FontSize="9" Foreground="#829389" Text="--" TextTrimming="CharacterEllipsis" />
           </StackPanel>
           <Grid Grid.Row="1" Width="154" Height="2" HorizontalAlignment="Left">
             <Border Background="#2869D08F" />

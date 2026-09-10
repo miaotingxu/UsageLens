@@ -54,7 +54,7 @@
             <Border Background="#29D7DEE7" CornerRadius="2" />
             <Border x:Name="FiveHourProgressFill" Width="0" Height="3" HorizontalAlignment="Left" Background="#55D6A4" CornerRadius="2" Visibility="Collapsed" />
           </Grid>
-          <TextBlock x:Name="FiveHourResetValue" Grid.Row="1" FontFamily="Cascadia Code, Consolas" FontSize="8" Foreground="#758397" Text="--" TextTrimming="CharacterEllipsis" />
+          <TextBlock x:Name="FiveHourResetValue" Grid.Row="1" FontFamily="Cascadia Code, Consolas" FontSize="9" Foreground="#758397" Text="--" TextTrimming="CharacterEllipsis" />
         </Grid>
         <TextBlock x:Name="FiveHourValue" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top" FontFamily="Cascadia Code, Consolas" FontSize="12" FontWeight="Bold" Foreground="#D7DEE7" Text="..." />
       </Grid>
@@ -68,7 +68,7 @@
             <Border Background="#29D7DEE7" CornerRadius="2" />
             <Border x:Name="WeeklyProgressFill" Width="0" Height="3" HorizontalAlignment="Left" Background="#55D6A4" CornerRadius="2" Visibility="Collapsed" />
           </Grid>
-          <TextBlock x:Name="WeeklyResetValue" Grid.Row="1" FontFamily="Cascadia Code, Consolas" FontSize="8" Foreground="#758397" Text="--" TextTrimming="CharacterEllipsis" />
+          <TextBlock x:Name="WeeklyResetValue" Grid.Row="1" FontFamily="Cascadia Code, Consolas" FontSize="9" Foreground="#758397" Text="--" TextTrimming="CharacterEllipsis" />
         </Grid>
         <TextBlock x:Name="WeeklyValue" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top" FontFamily="Cascadia Code, Consolas" FontSize="12" FontWeight="Bold" Foreground="#D7DEE7" Text="..." />
       </Grid>

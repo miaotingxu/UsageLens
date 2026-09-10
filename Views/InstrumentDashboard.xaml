@@ -57,7 +57,7 @@
           </Grid>
           <StackPanel Grid.Column="1" VerticalAlignment="Center">
             <TextBlock Style="{StaticResource InstrumentLabel}" FontSize="11" Text="5小时" />
-            <TextBlock x:Name="FiveHourResetValue" Margin="0,4,0,0" FontFamily="Cascadia Code, Consolas" FontSize="8" Foreground="#899CAD" Text="--" TextWrapping="Wrap" />
+            <TextBlock x:Name="FiveHourResetValue" Margin="0,4,0,0" FontFamily="Cascadia Code, Consolas" FontSize="9" Foreground="#899CAD" Text="--" TextWrapping="Wrap" />
           </StackPanel>
         </Grid>
 
@@ -73,7 +73,7 @@
           </Grid>
           <StackPanel Grid.Column="1" VerticalAlignment="Center">
             <TextBlock Style="{StaticResource InstrumentLabel}" FontSize="11" Text="7天额度" />
-            <TextBlock x:Name="WeeklyResetValue" Margin="0,4,0,0" FontFamily="Cascadia Code, Consolas" FontSize="8" Foreground="#899CAD" Text="--" TextWrapping="Wrap" />
+            <TextBlock x:Name="WeeklyResetValue" Margin="0,4,0,0" FontFamily="Cascadia Code, Consolas" FontSize="9" Foreground="#899CAD" Text="--" TextWrapping="Wrap" />
           </StackPanel>
         </Grid>
       </Grid>
