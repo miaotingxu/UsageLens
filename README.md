@@ -131,7 +131,7 @@ dotnet run --project .\tests\UsageLens.PresentationTests\UsageLens.PresentationT
 生成便携包：
 
 ```powershell
-.\scripts\package-release.ps1 -Version 1.3.1
+.\scripts\package-release.ps1 -Version 1.0.1
 ```
 
 ## 路线图

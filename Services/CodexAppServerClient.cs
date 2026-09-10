@@ -74,7 +74,7 @@ public sealed class CodexAppServerClient : IDisposable
                         {
                             name = "usage_lens",
                             title = "UsageLens",
-                            version = "1.3.1"
+                            version = "1.0.1"
                         }
                     },
                     cancellationToken);
