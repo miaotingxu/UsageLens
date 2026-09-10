@@ -26,13 +26,13 @@ foreach ($targetDirectory in @($releaseDirectory, $artifactsDirectory)) {
 
 Push-Location $repositoryRoot
 try {
-    dotnet run --project .\tests\CodexQuotaFloat.TokenUsageTests\CodexQuotaFloat.TokenUsageTests.csproj -c Release
+    dotnet run --project .\tests\UsageLens.TokenUsageTests\UsageLens.TokenUsageTests.csproj -c Release
     if ($LASTEXITCODE -ne 0) { throw 'Token 用量测试失败。' }
 
-    dotnet run --project .\tests\CodexQuotaFloat.PresentationTests\CodexQuotaFloat.PresentationTests.csproj -c Release
+    dotnet run --project .\tests\UsageLens.PresentationTests\UsageLens.PresentationTests.csproj -c Release
     if ($LASTEXITCODE -ne 0) { throw '展示层测试失败。' }
 
-    dotnet publish .\CodexQuotaFloat.csproj `
+    dotnet publish .\UsageLens.csproj `
         -c Release `
         -r win-x64 `
         --self-contained true `
@@ -49,19 +49,19 @@ finally {
     Pop-Location
 }
 
-$executablePath = Join-Path $releaseDirectory 'CodexQuotaFloat.exe'
+$executablePath = Join-Path $releaseDirectory 'UsageLens.exe'
 if (-not (Test-Path -LiteralPath $executablePath -PathType Leaf)) {
     throw "未生成预期的可执行文件：$executablePath"
 }
 
 Get-ChildItem -LiteralPath $releaseDirectory -Force |
-    Where-Object { $_.Name -ne 'CodexQuotaFloat.exe' } |
+    Where-Object { $_.Name -ne 'UsageLens.exe' } |
     Remove-Item -Recurse -Force
 
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'LICENSE') -Destination (Join-Path $releaseDirectory 'LICENSE')
 
 $quickStart = @"
-CodexQuotaFloat v$Version
+UsageLens v$Version
 ========================
 
 运行前提
@@ -73,7 +73,7 @@ CodexQuotaFloat v$Version
 开始使用
 --------
 1. 解压 ZIP 内的全部文件。
-2. 双击 CodexQuotaFloat.exe。
+2. 双击 UsageLens.exe。
 3. 鼠标离开 1 秒后窗口会折叠到屏幕顶部；移入顶部把手即可展开。
 4. 左右箭头切换界面，右键菜单可以刷新或退出。
 
@@ -83,7 +83,7 @@ CodexQuotaFloat v$Version
 
 项目主页
 --------
-https://github.com/miaotingxu/CodexQuotaFloat
+https://github.com/miaotingxu/UsageLens
 "@
 
 [System.IO.File]::WriteAllText(
@@ -91,7 +91,7 @@ https://github.com/miaotingxu/CodexQuotaFloat
     $quickStart,
     [System.Text.UTF8Encoding]::new($true))
 
-$archiveName = "CodexQuotaFloat-v$Version-win-x64-portable.zip"
+$archiveName = "UsageLens-v$Version-win-x64-portable.zip"
 $archivePath = Join-Path $artifactsDirectory $archiveName
 Compress-Archive -Path (Join-Path $releaseDirectory '*') -DestinationPath $archivePath -CompressionLevel Optimal
 

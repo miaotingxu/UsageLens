@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-09-10
+
+### Changed
+
+- Renamed the application, executable, assembly, namespace, repository and local settings directory to `UsageLens`.
+- Added one-time migration of style and horizontal position from the legacy `CodexQuotaFloat` settings directory.
+- Updated the portable package name and documentation to use `UsageLens`.
+
 ## [1.3.0] - 2026-09-10
 
 ### Added
@@ -16,5 +24,6 @@
 - 单实例、手动刷新、自动重连与读取失败时保留最近结果。
 - Windows x64 自包含单文件便携包和 SHA256 校验文件。
 
-[Unreleased]: https://github.com/miaotingxu/CodexQuotaFloat/compare/v1.3.0...HEAD
-[1.3.0]: https://github.com/miaotingxu/CodexQuotaFloat/releases/tag/v1.3.0
+[Unreleased]: https://github.com/miaotingxu/UsageLens/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/miaotingxu/UsageLens/releases/tag/v1.3.1
+[1.3.0]: https://github.com/miaotingxu/UsageLens/releases/tag/v1.3.0

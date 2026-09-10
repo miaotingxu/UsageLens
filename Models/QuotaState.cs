@@ -1,4 +1,4 @@
-namespace CodexQuotaFloat.Models;
+namespace UsageLens.Models;
 
 public enum QuotaStatus
 {

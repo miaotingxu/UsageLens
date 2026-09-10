@@ -1,11 +1,11 @@
 using System.Threading;
 using System.Windows;
 
-namespace CodexQuotaFloat;
+namespace UsageLens;
 
 public partial class App : Application
 {
-    private const string MutexName = "Local\\CodexQuotaFloat";
+    private const string MutexName = "Local\\UsageLens";
 
     private Mutex? _singleInstanceMutex;
     private bool _ownsMutex;

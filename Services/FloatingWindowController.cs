@@ -3,7 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
-namespace CodexQuotaFloat.Services;
+namespace UsageLens.Services;
 
 public sealed class FloatingWindowController : IDisposable
 {

@@ -1,6 +1,6 @@
-using CodexQuotaFloat.Models;
+using UsageLens.Models;
 
-namespace CodexQuotaFloat.Services;
+namespace UsageLens.Services;
 
 public static class TokenUsagePresentation
 {

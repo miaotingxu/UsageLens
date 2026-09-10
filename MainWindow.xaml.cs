@@ -5,11 +5,11 @@ using System.Windows.Input;
 using System.Windows.Media;
 using ShapePath = System.Windows.Shapes.Path;
 using System.Windows.Threading;
-using CodexQuotaFloat.Models;
-using CodexQuotaFloat.Services;
-using CodexQuotaFloat.Views;
+using UsageLens.Models;
+using UsageLens.Services;
+using UsageLens.Views;
 
-namespace CodexQuotaFloat;
+namespace UsageLens;
 
 public partial class MainWindow : Window, IDisposable
 {

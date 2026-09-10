@@ -1,6 +1,6 @@
 <div align="center">
 
-# CodexQuotaFloat
+# UsageLens
 
 ### 轻量、常驻顶部的 Codex 额度与 Token 用量悬浮窗
 
@@ -8,16 +8,16 @@
 
 [简体中文](README.md) · [English](README_EN.md)
 
-[![Release](https://img.shields.io/github/v/release/miaotingxu/CodexQuotaFloat?display_name=tag&sort=semver)](https://github.com/miaotingxu/CodexQuotaFloat/releases/latest) [![License](https://img.shields.io/github/license/miaotingxu/CodexQuotaFloat)](LICENSE) ![Windows](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4)
+[![Release](https://img.shields.io/github/v/release/miaotingxu/UsageLens?display_name=tag&sort=semver)](https://github.com/miaotingxu/UsageLens/releases/latest) [![License](https://img.shields.io/github/license/miaotingxu/UsageLens)](LICENSE) ![Windows](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4)
 
-[下载最新版](https://github.com/miaotingxu/CodexQuotaFloat/releases/latest) · [快速开始](#快速开始) · [English](README_EN.md)
+[下载最新版](https://github.com/miaotingxu/UsageLens/releases/latest) · [快速开始](#快速开始) · [English](README_EN.md)
 
 实时查看 Codex 额度、重置倒计时、本地 Token 用量和预估成本。<br>
 无需额外登录，无需 API Key，数据留在本机。
 
 </div>
 
-## 为什么使用 CodexQuotaFloat
+## 为什么使用 UsageLens
 
 ### 实时掌握额度
 
@@ -35,15 +35,15 @@
 
 当前版本内置四套界面，可通过窗口两侧箭头循环切换：Instrument、Glass、Timeline 和 Terminal。它们共享额度、Token、刷新、倒计时和折叠逻辑，只改变视觉呈现。
 
-![CodexQuotaFloat four interface styles](assets/screenshots/ui-overview.png)
+![UsageLens four interface styles](assets/screenshots/ui-overview.png)
 
 ## 下载与安装
 
-从 [Releases](https://github.com/miaotingxu/CodexQuotaFloat/releases/latest) 下载 `CodexQuotaFloat-v{版本号}-win-x64-portable.zip`。
+从 [Releases](https://github.com/miaotingxu/UsageLens/releases/latest) 下载 `UsageLens-v{版本号}-win-x64-portable.zip`。
 
-这是 Windows x64 免安装便携版：解压后直接运行 `CodexQuotaFloat.exe`，不需要另外安装 .NET Runtime。
+这是 Windows x64 免安装便携版：解压后直接运行 `UsageLens.exe`，不需要另外安装 .NET Runtime。
 
-> 使用前仍需在本机安装并登录 Codex。CodexQuotaFloat 复用 Codex 的现有登录状态读取额度。
+> 使用前仍需在本机安装并登录 Codex。UsageLens 复用 Codex 的现有登录状态读取额度。
 
 ## 系统要求
 
@@ -58,7 +58,7 @@
 
 1. 从最新 Release 下载 Portable ZIP。
 2. 将 ZIP 完整解压到任意目录，不要直接在压缩包内运行。
-3. 双击 `CodexQuotaFloat.exe`。
+3. 双击 `UsageLens.exe`。
 
 ## 操作方式
 
@@ -71,7 +71,8 @@
 | 右键 → 刷新 | 同时刷新额度和 Token 用量 |
 | 右键 → 退出 | 关闭程序 |
 
-样式和水平位置保存在 `%LOCALAPPDATA%\CodexQuotaFloat\appearance.json`，只包含样式名称和窗口横坐标，不包含账号、额度或会话数据。
+样式和水平位置保存在 `%LOCALAPPDATA%\UsageLens\appearance.json`，只包含样式名称和窗口横坐标，不包含账号、额度或会话数据。
+首次启动新版时，如果新目录尚无有效配置，程序会从旧版 `%LOCALAPPDATA%\CodexQuotaFloat\appearance.json` 迁移样式和横坐标；旧目录不会删除。
 
 ## 数据来源与隐私
 
@@ -99,7 +100,7 @@
 
 ### 双击后看不到窗口
 
-检查屏幕最上方是否只保留了折叠把手，将鼠标移到把手上即可展开。也可以结束已有的 `CodexQuotaFloat.exe` 后重新启动。删除 `%LOCALAPPDATA%\CodexQuotaFloat\appearance.json` 可重置样式和位置。
+检查屏幕最上方是否只保留了折叠把手，将鼠标移到把手上即可展开。也可以结束已有的 `UsageLens.exe` 后重新启动。删除 `%LOCALAPPDATA%\UsageLens\appearance.json` 可重置样式和位置。
 
 ### 额度显示 `--`
 
@@ -114,23 +115,23 @@
 需要 [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)。
 
 ```powershell
-git clone https://github.com/miaotingxu/CodexQuotaFloat.git
-cd CodexQuotaFloat
-dotnet build .\CodexQuotaFloat.csproj -c Release
-dotnet run --project .\CodexQuotaFloat.csproj
+git clone https://github.com/miaotingxu/UsageLens.git
+cd UsageLens
+dotnet build .\UsageLens.csproj -c Release
+dotnet run --project .\UsageLens.csproj
 ```
 
 运行测试：
 
 ```powershell
-dotnet run --project .\tests\CodexQuotaFloat.TokenUsageTests\CodexQuotaFloat.TokenUsageTests.csproj -c Release
-dotnet run --project .\tests\CodexQuotaFloat.PresentationTests\CodexQuotaFloat.PresentationTests.csproj -c Release
+dotnet run --project .\tests\UsageLens.TokenUsageTests\UsageLens.TokenUsageTests.csproj -c Release
+dotnet run --project .\tests\UsageLens.PresentationTests\UsageLens.PresentationTests.csproj -c Release
 ```
 
 生成便携包：
 
 ```powershell
-.\scripts\package-release.ps1 -Version 1.3.0
+.\scripts\package-release.ps1 -Version 1.3.1
 ```
 
 ## 路线图

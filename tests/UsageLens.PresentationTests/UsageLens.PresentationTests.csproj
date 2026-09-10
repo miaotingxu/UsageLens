@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="../../Models/FloatingStyleKind.cs" Link="Models/FloatingStyleKind.cs" />
+    <Compile Include="../../Services/AppearanceSettingsStore.cs" Link="Services/AppearanceSettingsStore.cs" />
     <Compile Include="../../Services/HorizontalWindowPlacement.cs" Link="Services/HorizontalWindowPlacement.cs" />
     <Compile Include="../../Services/QuotaPresentation.cs" Link="Services/QuotaPresentation.cs" />
   </ItemGroup>

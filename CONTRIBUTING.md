@@ -1,6 +1,6 @@
 # 参与贡献
 
-感谢你愿意改进 CodexQuotaFloat。
+感谢你愿意改进 UsageLens。
 
 ## 开发环境
 
@@ -16,9 +16,9 @@
 4. 提交 Pull Request 前运行构建和全部测试。
 
 ```powershell
-dotnet build .\CodexQuotaFloat.csproj -c Release
-dotnet run --project .\tests\CodexQuotaFloat.TokenUsageTests\CodexQuotaFloat.TokenUsageTests.csproj -c Release
-dotnet run --project .\tests\CodexQuotaFloat.PresentationTests\CodexQuotaFloat.PresentationTests.csproj -c Release
+dotnet build .\UsageLens.csproj -c Release
+dotnet run --project .\tests\UsageLens.TokenUsageTests\UsageLens.TokenUsageTests.csproj -c Release
+dotnet run --project .\tests\UsageLens.PresentationTests\UsageLens.PresentationTests.csproj -c Release
 ```
 
 ## Pull Request
