@@ -37,9 +37,14 @@ jobs:
             throw "Expected exactly one ZIP artifact, found $($archive.Count)."
           }
           $checksum = (Resolve-Path -LiteralPath .\artifacts\SHA256SUMS.txt).Path
-          gh release create $env:GITHUB_REF_NAME `
-            $archive.FullName `
-            $checksum `
-            --generate-notes `
-            --verify-tag `
-            --title $env:GITHUB_REF_NAME
+          $releaseArguments = @(
+            $env:GITHUB_REF_NAME,
+            $archive.FullName,
+            $checksum,
+            '--generate-notes',
+            '--verify-tag',
+            '--title', $env:GITHUB_REF_NAME)
+          if ($env:GITHUB_REF_NAME -match '-') {
+            $releaseArguments += '--prerelease'
+          }
+          gh release create @releaseArguments
