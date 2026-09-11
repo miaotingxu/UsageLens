@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidatePattern('^\d+\.\d+\.\d+$')]
+    [ValidatePattern('^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$')]
     [string]$Version
 )
 
@@ -31,6 +31,12 @@ try {
 
     dotnet run --project .\tests\UsageLens.PresentationTests\UsageLens.PresentationTests.csproj -c Release
     if ($LASTEXITCODE -ne 0) { throw '展示层测试失败。' }
+
+    dotnet run --project .\tests\UsageLens.SettingsTests\UsageLens.SettingsTests.csproj -c Release
+    if ($LASTEXITCODE -ne 0) { throw '设置与迁移测试失败。' }
+
+    dotnet run --project .\tests\UsageLens.CoordinatorTests\UsageLens.CoordinatorTests.csproj -c Release
+    if ($LASTEXITCODE -ne 0) { throw '刷新协调器测试失败。' }
 
     dotnet publish .\UsageLens.csproj `
         -c Release `
@@ -73,9 +79,14 @@ UsageLens v$Version
 开始使用
 --------
 1. 解压 ZIP 内的全部文件。
-2. 双击 UsageLens.exe。
+2. 双击 UsageLens.exe；右下角会出现 UsageLens 图标。
 3. 鼠标离开 1 秒后窗口会折叠到屏幕顶部；移入顶部把手即可展开。
-4. 左右箭头切换界面，右键菜单可以刷新或退出。
+4. 左右箭头切换界面，浮窗右键可打开控制中心、刷新或退出。
+5. 托盘左键打开控制中心，双击显示/隐藏悬浮窗，右键可进入设置、切换样式、刷新或退出。
+
+控制中心与隐私
+--------------
+控制中心展示与悬浮窗相同的一份额度和 Token 数据。程序复用本机 Codex 的已有登录状态，不读取或保存账号凭据；Token 统计仅扫描本机会话的用量元数据。
 
 数据说明
 --------

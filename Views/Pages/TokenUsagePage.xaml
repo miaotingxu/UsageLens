@@ -1,0 +1,36 @@
+<UserControl x:Class="UsageLens.Views.Pages.TokenUsagePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel>
+      <DockPanel Margin="0,0,0,12">
+        <TextBlock Text="本机 Token 统计" Style="{StaticResource SectionTitleStyle}" />
+        <TextBlock DockPanel.Dock="Right" Text="{Binding TokenStatusText}" Style="{StaticResource MutedTextStyle}" />
+      </DockPanel>
+      <Border Style="{StaticResource SectionCardStyle}" Margin="0,0,0,10">
+        <Grid>
+          <Grid.ColumnDefinitions><ColumnDefinition Width="112" /><ColumnDefinition /><ColumnDefinition Width="132" /></Grid.ColumnDefinitions>
+          <StackPanel><TextBlock Text="当日" Style="{StaticResource CardLabelStyle}" /><TextBlock Text="本地自然日" Style="{StaticResource MutedTextStyle}" /></StackPanel>
+          <StackPanel Grid.Column="1"><TextBlock Text="{Binding TodayTotalText}" ToolTip="{Binding TodayTokenTooltip}" Style="{StaticResource TokenNumberStyle}" /><StackPanel Orientation="Horizontal"><TextBlock Text="IN " Foreground="#7ECBFF" Style="{StaticResource SmallTextStyle}" /><TextBlock Text="{Binding TodayInputText}" ToolTip="{Binding TodayInputTooltip}" Foreground="#7ECBFF" Style="{StaticResource SmallTextStyle}" /></StackPanel><StackPanel Orientation="Horizontal"><TextBlock Text="OUT " Foreground="#C7A4FF" Style="{StaticResource SmallTextStyle}" /><TextBlock Text="{Binding TodayOutputText}" ToolTip="{Binding TodayOutputTooltip}" Foreground="#C7A4FF" Style="{StaticResource SmallTextStyle}" /></StackPanel></StackPanel>
+          <TextBlock Grid.Column="2" Text="{Binding TodayPriceText}" Foreground="#79E5B7" Style="{StaticResource PriceStyle}" VerticalAlignment="Center" />
+        </Grid>
+      </Border>
+      <Border Style="{StaticResource SectionCardStyle}" Margin="0,0,0,10">
+        <Grid>
+          <Grid.ColumnDefinitions><ColumnDefinition Width="112" /><ColumnDefinition /><ColumnDefinition Width="132" /></Grid.ColumnDefinitions>
+          <StackPanel><TextBlock Text="近 7 天" Style="{StaticResource CardLabelStyle}" /><TextBlock Text="今天及之前 6 日" Style="{StaticResource MutedTextStyle}" /></StackPanel>
+          <StackPanel Grid.Column="1"><TextBlock Text="{Binding SevenDayTotalText}" ToolTip="{Binding SevenDayTokenTooltip}" Style="{StaticResource TokenNumberStyle}" /><StackPanel Orientation="Horizontal"><TextBlock Text="IN " Foreground="#7ECBFF" Style="{StaticResource SmallTextStyle}" /><TextBlock Text="{Binding SevenDayInputText}" ToolTip="{Binding SevenDayInputTooltip}" Foreground="#7ECBFF" Style="{StaticResource SmallTextStyle}" /></StackPanel><StackPanel Orientation="Horizontal"><TextBlock Text="OUT " Foreground="#C7A4FF" Style="{StaticResource SmallTextStyle}" /><TextBlock Text="{Binding SevenDayOutputText}" ToolTip="{Binding SevenDayOutputTooltip}" Foreground="#C7A4FF" Style="{StaticResource SmallTextStyle}" /></StackPanel></StackPanel>
+          <TextBlock Grid.Column="2" Text="{Binding SevenDayPriceText}" Foreground="#79E5B7" Style="{StaticResource PriceStyle}" VerticalAlignment="Center" />
+        </Grid>
+      </Border>
+      <Border Style="{StaticResource SectionCardStyle}">
+        <Grid>
+          <Grid.ColumnDefinitions><ColumnDefinition Width="112" /><ColumnDefinition /><ColumnDefinition Width="132" /></Grid.ColumnDefinitions>
+          <StackPanel><TextBlock Text="近 30 天" Style="{StaticResource CardLabelStyle}" /><TextBlock Text="今天及之前 29 日" Style="{StaticResource MutedTextStyle}" /></StackPanel>
+          <StackPanel Grid.Column="1"><TextBlock Text="{Binding ThirtyDayTotalText}" ToolTip="{Binding ThirtyDayTokenTooltip}" Style="{StaticResource TokenNumberStyle}" /><StackPanel Orientation="Horizontal"><TextBlock Text="IN " Foreground="#7ECBFF" Style="{StaticResource SmallTextStyle}" /><TextBlock Text="{Binding ThirtyDayInputText}" ToolTip="{Binding ThirtyDayInputTooltip}" Foreground="#7ECBFF" Style="{StaticResource SmallTextStyle}" /></StackPanel><StackPanel Orientation="Horizontal"><TextBlock Text="OUT " Foreground="#C7A4FF" Style="{StaticResource SmallTextStyle}" /><TextBlock Text="{Binding ThirtyDayOutputText}" ToolTip="{Binding ThirtyDayOutputTooltip}" Foreground="#C7A4FF" Style="{StaticResource SmallTextStyle}" /></StackPanel></StackPanel>
+          <TextBlock Grid.Column="2" Text="{Binding ThirtyDayPriceText}" Foreground="#79E5B7" Style="{StaticResource PriceStyle}" VerticalAlignment="Center" />
+        </Grid>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

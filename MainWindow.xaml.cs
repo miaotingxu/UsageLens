@@ -21,32 +21,17 @@ public partial class MainWindow : Window, IDisposable
         FloatingStyleKind.Terminal
     ];
 
-    private static readonly TimeSpan[] ReconnectDelays =
-    [
-        TimeSpan.FromSeconds(3),
-        TimeSpan.FromSeconds(10),
-        TimeSpan.FromSeconds(30)
-    ];
-
-    private readonly CodexAppServerClient _client = new();
-    private readonly QuotaParser _quotaParser = new();
-    private readonly LocalTokenUsageService _tokenUsageService = new();
-    private readonly AppearanceSettingsStore _appearanceSettingsStore = new();
-    private readonly DispatcherTimer _refreshTimer;
-    private readonly DispatcherTimer _tokenRefreshTimer;
-    private readonly DispatcherTimer _reconnectTimer;
+    private readonly AppSettingsStore _settingsStore;
+    private readonly Func<Task> _refreshAllAsync;
+    private readonly Action _exitApplication;
     private readonly DispatcherTimer _countdownTimer;
-    private readonly SemaphoreSlim _refreshGate = new(1, 1);
-    private readonly SemaphoreSlim _tokenRefreshGate = new(1, 1);
-    private readonly CancellationTokenSource _lifetimeCancellation = new();
     private readonly IReadOnlyDictionary<FloatingStyleKind, FrameworkElement> _styleViews;
+    private Action? _openControlCenter;
 
     private FloatingWindowController? _floatingWindowController;
     private FloatingStyleKind _selectedStyle;
     private QuotaState _currentState = QuotaState.Loading();
-    private QuotaState? _lastSuccessfulState;
     private TokenUsageState _tokenUsageState = TokenUsageState.Loading();
-    private TokenUsageState? _lastSuccessfulTokenUsageState;
     private string _quotaStatusMessage = "正在连接 Codex…";
     private Brush _quotaStatusBrush = Brushes.Gainsboro;
     private string _tokenStatusMessage = "Loading…";
@@ -55,12 +40,19 @@ public partial class MainWindow : Window, IDisposable
     private bool _isHorizontalDragging;
     private double _dragStartMouseScreenX;
     private double _dragStartWindowLeft;
-    private int _reconnectAttempt;
+    private AppSettings _settings;
     private bool _disposed;
 
-    public MainWindow()
+    public MainWindow(
+        AppSettingsStore? settingsStore = null,
+        Func<Task>? refreshAllAsync = null,
+        Action? exitApplication = null)
     {
         InitializeComponent();
+        _settingsStore = settingsStore ?? new AppSettingsStore();
+        _refreshAllAsync = refreshAllAsync ?? (() => Task.CompletedTask);
+        _exitApplication = exitApplication ?? (() => { });
+        _settings = _settingsStore.Load();
         _styleViews = new Dictionary<FloatingStyleKind, FrameworkElement>
         {
             [FloatingStyleKind.Instrument] = new InstrumentDashboard(),
@@ -68,24 +60,13 @@ public partial class MainWindow : Window, IDisposable
             [FloatingStyleKind.Timeline] = new TimelineDashboard(),
             [FloatingStyleKind.Terminal] = new TerminalDashboard()
         };
-        var appearance = _appearanceSettingsStore.Load();
-        _selectedStyle = appearance.Style;
-        _savedWindowLeft = appearance.Left;
+        _selectedStyle = _settings.FloatingStyle;
+        _savedWindowLeft = _settings.FloatingLeft;
         ApplyStyle(_selectedStyle, savePreference: false);
-
-        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
-        _refreshTimer.Tick += RefreshTimerOnTick;
-
-        _tokenRefreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(5) };
-        _tokenRefreshTimer.Tick += TokenRefreshTimerOnTick;
-
-        _reconnectTimer = new DispatcherTimer();
-        _reconnectTimer.Tick += ReconnectTimerOnTick;
 
         _countdownTimer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
         _countdownTimer.Tick += CountdownTimerOnTick;
 
-        _client.Exited += ClientOnExited;
         SetQuotaState(_currentState);
         SetTokenUsageState(_tokenUsageState);
     }
@@ -111,21 +92,12 @@ public partial class MainWindow : Window, IDisposable
         }
 
         _disposed = true;
-        _refreshTimer.Stop();
-        _tokenRefreshTimer.Stop();
-        _reconnectTimer.Stop();
         _countdownTimer.Stop();
-        _refreshTimer.Tick -= RefreshTimerOnTick;
-        _tokenRefreshTimer.Tick -= TokenRefreshTimerOnTick;
-        _reconnectTimer.Tick -= ReconnectTimerOnTick;
         _countdownTimer.Tick -= CountdownTimerOnTick;
-        _lifetimeCancellation.Cancel();
-        _client.Exited -= ClientOnExited;
         _floatingWindowController?.Dispose();
-        _client.Dispose();
     }
 
-    private async void WindowOnLoaded(object sender, RoutedEventArgs e)
+    private void WindowOnLoaded(object sender, RoutedEventArgs e)
     {
         PositionOnPrimaryScreen();
         _floatingWindowController = new FloatingWindowController(
@@ -134,10 +106,13 @@ public partial class MainWindow : Window, IDisposable
             HoverZone,
             SetSelectedDashboardShadowVisible,
             SetStyleNavigationVisible);
-        _refreshTimer.Start();
-        _tokenRefreshTimer.Start();
+        _floatingWindowController.ApplyBehavior(FloatingWindowBehavior.From(_settings));
+        ApplyCardBackgroundOpacity(_settings.FloatingOpacity);
         _countdownTimer.Start();
-        await Task.WhenAll(RefreshAsync(), RefreshTokenUsageAsync());
+        // 首次显示时也遵循自动折叠策略；若鼠标正停在卡片上，控制器会保留展开状态。
+        Dispatcher.BeginInvoke(
+            System.Windows.Threading.DispatcherPriority.Background,
+            new Action(() => _floatingWindowController?.ScheduleCollapse()));
     }
 
     private void WindowOnClosed(object? sender, EventArgs e)
@@ -147,26 +122,17 @@ public partial class MainWindow : Window, IDisposable
 
         if (!Application.Current.Dispatcher.HasShutdownStarted)
         {
-            Application.Current.Shutdown();
+            _exitApplication();
         }
-    }
-
-    private async void RefreshTimerOnTick(object? sender, EventArgs e) => await RefreshAsync();
-
-    private async void TokenRefreshTimerOnTick(object? sender, EventArgs e) => await RefreshTokenUsageAsync();
-
-    private async void ReconnectTimerOnTick(object? sender, EventArgs e)
-    {
-        _reconnectTimer.Stop();
-        await RefreshAsync();
     }
 
     private void CountdownTimerOnTick(object? sender, EventArgs e) => UpdateQuotaPresentation();
 
-    private async void RefreshMenuItemOnClick(object sender, RoutedEventArgs e) =>
-        await Task.WhenAll(RefreshAsync(), RefreshTokenUsageAsync());
+    private async void RefreshMenuItemOnClick(object sender, RoutedEventArgs e) => await _refreshAllAsync();
 
-    private void ExitMenuItemOnClick(object sender, RoutedEventArgs e) => Close();
+    private void OpenControlCenterMenuItemOnClick(object sender, RoutedEventArgs e) => _openControlCenter?.Invoke();
+
+    private void ExitMenuItemOnClick(object sender, RoutedEventArgs e) => _exitApplication();
 
     private void PreviousStyleButtonOnClick(object sender, RoutedEventArgs e)
     {
@@ -351,107 +317,86 @@ public partial class MainWindow : Window, IDisposable
         }
     }
 
-    private async Task RefreshAsync()
+    private void ApplyCardBackgroundOpacity(double opacity)
     {
-        if (_disposed || !_refreshGate.Wait(0))
+        // 窗口保持完全不透明，避免文字和控件随背景一起变淡。
+        Opacity = 1.0;
+        foreach (var dashboard in _styleViews.Values.OfType<IBackgroundOpacityDashboard>())
+        {
+            dashboard.SetCardBackgroundOpacity(opacity);
+        }
+    }
+
+    public void ApplySnapshot(UsageSnapshot snapshot)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            _ = Dispatcher.InvokeAsync(() => ApplySnapshot(snapshot));
+            return;
+        }
+
+        SetQuotaState(snapshot.Quota);
+        SetTokenUsageState(snapshot.TokenUsage);
+    }
+
+    public void ApplySettings(AppSettings settings)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            _ = Dispatcher.InvokeAsync(() => ApplySettings(settings));
+            return;
+        }
+
+        _settings = settings;
+        _savedWindowLeft = settings.FloatingLeft;
+        ApplyCardBackgroundOpacity(settings.FloatingOpacity);
+        ApplyStyle(settings.FloatingStyle, savePreference: false);
+        _floatingWindowController?.ApplyBehavior(FloatingWindowBehavior.From(settings));
+        var workArea = SystemParameters.WorkArea;
+        Left = HorizontalWindowPlacement.ResolveInitialLeft(
+            _savedWindowLeft,
+            workArea.Left,
+            workArea.Width,
+            Width);
+        Top = workArea.Top;
+    }
+
+    public void ShowFloating()
+    {
+        if (_disposed)
         {
             return;
         }
 
-        try
+        if (!IsVisible)
         {
-            SetStatusText(
-                _lastSuccessfulState is null ? "正在连接 Codex…" : "正在刷新 Codex 额度…",
-                Brushes.LightSteelBlue);
-            var result = await _client.ReadRateLimitsAsync(_lifetimeCancellation.Token);
-            var state = _quotaParser.Parse(result, DateTimeOffset.Now);
+            Show();
+        }
 
-            _lastSuccessfulState = state;
-            _reconnectAttempt = 0;
-            _reconnectTimer.Stop();
-            SetQuotaState(state);
-        }
-        catch (OperationCanceledException) when (_lifetimeCancellation.IsCancellationRequested)
+        Top = SystemParameters.WorkArea.Top;
+        Activate();
+    }
+
+    public void HideFloating() => Hide();
+
+    public void ToggleFloatingVisibility()
+    {
+        if (IsVisible)
         {
-            // 应用正在退出，无需改变界面状态。
+            HideFloating();
         }
-        catch (Exception exception)
+        else
         {
-            ApplyRefreshFailure(GetFriendlyFailureMessage(exception));
-        }
-        finally
-        {
-            _refreshGate.Release();
+            ShowFloating();
         }
     }
 
-    private async Task RefreshTokenUsageAsync()
+    public void SelectStyle(FloatingStyleKind style) => ApplyStyle(style, savePreference: true);
+
+    public Action? OpenControlCenterAction
     {
-        if (_disposed || !_tokenRefreshGate.Wait(0))
-        {
-            return;
-        }
-
-        try
-        {
-            SetTokenStatus(
-                _lastSuccessfulTokenUsageState is null ? "Loading…" : "Refreshing…",
-                Brushes.LightSteelBlue);
-            var state = await Task.Run(
-                async () => await _tokenUsageService.ReadAsync(DateTimeOffset.Now, _lifetimeCancellation.Token),
-                _lifetimeCancellation.Token);
-            _lastSuccessfulTokenUsageState = state;
-            SetTokenUsageState(state);
-        }
-        catch (OperationCanceledException) when (_lifetimeCancellation.IsCancellationRequested)
-        {
-            // 应用正在退出，无需改变界面状态。
-        }
-        catch
-        {
-            SetTokenUsageState(_lastSuccessfulTokenUsageState?.MarkStale() ?? TokenUsageState.Offline());
-        }
-        finally
-        {
-            _tokenRefreshGate.Release();
-        }
-    }
-
-    private void ClientOnExited(object? sender, EventArgs e)
-    {
-        if (_disposed || Dispatcher.HasShutdownStarted)
-        {
-            return;
-        }
-
-        _ = Dispatcher.InvokeAsync(() =>
-        {
-            if (!_disposed)
-            {
-                ApplyRefreshFailure("Codex App Server 已退出，正在重新连接…");
-            }
-        });
-    }
-
-    private void ApplyRefreshFailure(string? statusMessage = null)
-    {
-        SetQuotaState(
-            _lastSuccessfulState?.MarkStale() ?? QuotaState.Offline(),
-            statusMessage ?? "无法读取额度，请确认 Codex 已登录；正在重试…");
-        ScheduleReconnect();
-    }
-
-    private void ScheduleReconnect()
-    {
-        if (_disposed || _reconnectTimer.IsEnabled)
-        {
-            return;
-        }
-
-        var delayIndex = Math.Min(_reconnectAttempt, ReconnectDelays.Length - 1);
-        _reconnectTimer.Interval = ReconnectDelays[delayIndex];
-        _reconnectAttempt = Math.Min(_reconnectAttempt + 1, ReconnectDelays.Length - 1);
-        _reconnectTimer.Start();
+        get => _openControlCenter;
+        set => _openControlCenter = value;
     }
 
     private void PositionOnPrimaryScreen()
@@ -471,7 +416,12 @@ public partial class MainWindow : Window, IDisposable
         var left = position?.X ?? Left;
 
         _savedWindowLeft = left;
-        _appearanceSettingsStore.Save(_selectedStyle, left);
+        _settings = _settings with
+        {
+            FloatingStyle = _selectedStyle,
+            FloatingLeft = left
+        };
+        _settingsStore.Save(_settings);
     }
 
     private static string FormatQuota(int? remainingPercent, QuotaStatus status) =>
@@ -677,10 +627,4 @@ public partial class MainWindow : Window, IDisposable
         _ => Brushes.Gainsboro
     };
 
-    private static string GetFriendlyFailureMessage(Exception exception) => exception switch
-    {
-        FileNotFoundException => "未检测到 Codex.exe，请确认已安装 Codex",
-        UnauthorizedAccessException => "无权启动 Codex，请检查 Codex 安装状态",
-        _ => "无法读取额度，请确认 Codex 已登录；正在重试…"
-    };
 }

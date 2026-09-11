@@ -33,7 +33,17 @@ The widget stays attached to the primary screen's top edge and can only be dragg
 
 The current release includes Instrument, Glass, Timeline, and Terminal styles. Use the arrows on either side of the window to cycle through them; only the visual presentation changes.
 
+> The following UI preview uses neutral sample data. It contains no real account, session, or usage data.
+
 ![UsageLens four interface styles](assets/screenshots/ui-overview.png)
+
+Control center preview (neutral sample data):
+
+![UsageLens control center](docs/screenshots/control-center.png)
+
+See the [control-center development plan](docs/superpowers/plans/2026-09-11-usagelens-tray-control-center.md)
+for the complete size, spacing, typography, color, state-flow, JSON-RPC, settings, acceptance, and troubleshooting
+specification.
 
 ## Download and install
 
@@ -66,11 +76,14 @@ This is a Windows x64 portable package. Extract it and run `UsageLens.exe`; no s
 | Click the left or right arrow | Cycle through the four UI styles |
 | Move the pointer away for 1 second | Fold the card toward the top edge |
 | Move the pointer onto the top handle | Expand the card |
+| Floating window right-click → Open control center | Open the five-page control center |
 | Right-click → Refresh | Refresh quota and token usage |
 | Right-click → Exit | Close the application |
 
-The selected style and horizontal position are stored in `%LOCALAPPDATA%\UsageLens\appearance.json`. It contains only the style and window X coordinate, not account, quota, or session data.
-On first launch, if the new path has no valid settings, the app migrates the style and horizontal position from `%LOCALAPPDATA%\CodexQuotaFloat\appearance.json`; the legacy directory is never deleted.
+The selected style, window behavior, and refresh intervals are stored in `%LOCALAPPDATA%\UsageLens\settings.json`. It contains only UI preferences, not account, quota, or session data.
+On first launch, if the new path has no valid settings, the app migrates the style and horizontal position from `%LOCALAPPDATA%\UsageLens\appearance.json` or `%LOCALAPPDATA%\CodexQuotaFloat\appearance.json`; legacy files are never deleted.
+
+UsageLens also provides a notification-area tray icon and a five-page control center: Overview, Quota, Token usage, Session source, and Settings. A single tray click opens the control center by default, a tray double-click toggles the floating window, and the context menu can refresh data, change style, open settings, or exit.
 
 ## Data and privacy
 
@@ -126,19 +139,21 @@ Run tests:
 ```powershell
 dotnet run --project .\tests\UsageLens.TokenUsageTests\UsageLens.TokenUsageTests.csproj -c Release
 dotnet run --project .\tests\UsageLens.PresentationTests\UsageLens.PresentationTests.csproj -c Release
+dotnet run --project .\tests\UsageLens.SettingsTests\UsageLens.SettingsTests.csproj -c Release
+dotnet run --project .\tests\UsageLens.CoordinatorTests\UsageLens.CoordinatorTests.csproj -c Release
 ```
 
 Build the portable package:
 
 ```powershell
-.\scripts\package-release.ps1 -Version 1.0.1
+.\scripts\package-release.ps1 -Version 1.1.0
 ```
 
 ## Roadmap
 
 - Improve multi-monitor behavior.
-- Add configurable refresh and folding behavior.
 - Expand model and pricing coverage.
+- Add daily token trends and broader model pricing coverage.
 - Improve package signing and update experience.
 
 ## Contributing and license

@@ -7,3 +7,11 @@ public interface ICollapsibleDashboard
 {
     void SetCardShadowVisible(bool isVisible);
 }
+
+/// <summary>
+/// 仅调整卡片底色，不让窗口整体透明度影响文字、进度条和交互控件。
+/// </summary>
+public interface IBackgroundOpacityDashboard
+{
+    void SetCardBackgroundOpacity(double opacity);
+}

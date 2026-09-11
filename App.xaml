@@ -4,5 +4,21 @@
              ShutdownMode="OnExplicitShutdown"
              Startup="OnStartup"
              Exit="OnExit">
-  <Application.Resources />
+  <Application.Resources>
+    <ResourceDictionary>
+      <Style x:Key="CardLabelStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#8FA1B7" /><Setter Property="FontSize" Value="11" /><Setter Property="FontWeight" Value="SemiBold" /></Style>
+      <Style x:Key="SectionTitleStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#E2EBF7" /><Setter Property="FontSize" Value="14" /><Setter Property="FontWeight" Value="SemiBold" /></Style>
+      <Style x:Key="BodyTextStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#BAC8D8" /><Setter Property="FontSize" Value="12" /><Setter Property="TextWrapping" Value="Wrap" /></Style>
+      <Style x:Key="MutedTextStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#74879E" /><Setter Property="FontSize" Value="10" /></Style>
+      <Style x:Key="SmallTextStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#BAC8D8" /><Setter Property="FontSize" Value="10" /></Style>
+      <Style x:Key="ValueTextStyle" TargetType="TextBlock"><Setter Property="FontSize" Value="12" /><Setter Property="FontWeight" Value="SemiBold" /><Setter Property="HorizontalAlignment" Value="Right" /></Style>
+      <Style x:Key="ResetTextStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#BAC8D8" /><Setter Property="FontSize" Value="11" /><Setter Property="Margin" Value="0,3,0,0" /></Style>
+      <Style x:Key="BigNumberStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#F2F7FF" /><Setter Property="FontSize" Value="30" /><Setter Property="FontWeight" Value="Bold" /><Setter Property="Margin" Value="0,12,0,4" /></Style>
+      <Style x:Key="HugeNumberStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#F2F7FF" /><Setter Property="FontSize" Value="30" /><Setter Property="FontWeight" Value="Bold" /><Setter Property="Margin" Value="0,15,0,0" /></Style>
+      <Style x:Key="TokenNumberStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#F2F7FF" /><Setter Property="FontSize" Value="24" /><Setter Property="FontWeight" Value="Bold" /><Setter Property="Margin" Value="0,8,0,4" /></Style>
+      <Style x:Key="PriceStyle" TargetType="TextBlock"><Setter Property="FontSize" Value="14" /><Setter Property="FontWeight" Value="SemiBold" /><Setter Property="HorizontalAlignment" Value="Right" /></Style>
+      <Style x:Key="SummaryCardStyle" TargetType="Border"><Setter Property="Padding" Value="16" /><Setter Property="Background" Value="#172838" /><Setter Property="BorderBrush" Value="#20FFFFFF" /><Setter Property="BorderThickness" Value="1" /><Setter Property="CornerRadius" Value="14" /></Style>
+      <Style x:Key="SectionCardStyle" TargetType="Border"><Setter Property="Padding" Value="17" /><Setter Property="Background" Value="#132333" /><Setter Property="BorderBrush" Value="#18FFFFFF" /><Setter Property="BorderThickness" Value="1" /><Setter Property="CornerRadius" Value="14" /></Style>
+    </ResourceDictionary>
+  </Application.Resources>
 </Application>

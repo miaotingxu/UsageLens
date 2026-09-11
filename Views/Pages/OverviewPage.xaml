@@ -1,0 +1,96 @@
+<UserControl x:Class="UsageLens.Views.Pages.OverviewPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel>
+      <Grid Margin="0,0,0,12">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition />
+          <ColumnDefinition />
+          <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}" Margin="0,0,6,0">
+          <StackPanel>
+            <TextBlock Text="5 小时额度" Style="{StaticResource CardLabelStyle}" />
+            <TextBlock Text="{Binding FiveHourText}" Foreground="{Binding FiveHourBrush}" Style="{StaticResource BigNumberStyle}" />
+            <TextBlock Text="RESET" Style="{StaticResource MutedTextStyle}" />
+            <TextBlock Text="{Binding FiveHourResetText}" Style="{StaticResource SmallTextStyle}" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="1" Style="{StaticResource SummaryCardStyle}" Margin="6,0">
+          <StackPanel>
+            <TextBlock Text="7 天额度" Style="{StaticResource CardLabelStyle}" />
+            <TextBlock Text="{Binding WeeklyText}" Foreground="{Binding WeeklyBrush}" Style="{StaticResource BigNumberStyle}" />
+            <TextBlock Text="RESET" Style="{StaticResource MutedTextStyle}" />
+            <TextBlock Text="{Binding WeeklyResetText}" Style="{StaticResource SmallTextStyle}" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}" Margin="6,0,0,0">
+          <StackPanel>
+            <TextBlock Text="今日 Token" Style="{StaticResource CardLabelStyle}" />
+            <TextBlock Text="{Binding TodayTotalText}" Foreground="#7ECBFF" Style="{StaticResource BigNumberStyle}" />
+            <TextBlock Text="{Binding TodayPriceText}" Foreground="#79E5B7" Style="{StaticResource SmallTextStyle}" />
+            <TextBlock Text="本机统计" Style="{StaticResource MutedTextStyle}" />
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <Border Style="{StaticResource SectionCardStyle}" Margin="0,0,0,12">
+        <StackPanel>
+          <DockPanel Margin="0,0,0,12">
+            <TextBlock Text="额度窗口" Style="{StaticResource SectionTitleStyle}" />
+            <TextBlock DockPanel.Dock="Right" Text="{Binding Snapshot.CapturedAt, StringFormat=更新时间 {0:HH:mm:ss}}" Style="{StaticResource MutedTextStyle}" />
+          </DockPanel>
+          <Grid Margin="0,0,0,12">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="105" /><ColumnDefinition /><ColumnDefinition Width="54" /></Grid.ColumnDefinitions>
+            <TextBlock Text="5 小时" Style="{StaticResource BodyTextStyle}" VerticalAlignment="Center" />
+            <ProgressBar Grid.Column="1" Margin="12,0" Height="6" Maximum="100" Value="{Binding Snapshot.Quota.FiveHourRemaining}" Foreground="{Binding FiveHourBrush}" Background="#263649" BorderThickness="0" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="2" Text="{Binding FiveHourText}" Foreground="{Binding FiveHourBrush}" Style="{StaticResource ValueTextStyle}" />
+          </Grid>
+          <Grid>
+            <Grid.ColumnDefinitions><ColumnDefinition Width="105" /><ColumnDefinition /><ColumnDefinition Width="54" /></Grid.ColumnDefinitions>
+            <TextBlock Text="7 天额度" Style="{StaticResource BodyTextStyle}" VerticalAlignment="Center" />
+            <ProgressBar Grid.Column="1" Margin="12,0" Height="6" Maximum="100" Value="{Binding Snapshot.Quota.WeeklyRemaining}" Foreground="{Binding WeeklyBrush}" Background="#263649" BorderThickness="0" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="2" Text="{Binding WeeklyText}" Foreground="{Binding WeeklyBrush}" Style="{StaticResource ValueTextStyle}" />
+          </Grid>
+        </StackPanel>
+      </Border>
+
+      <Border Style="{StaticResource SectionCardStyle}">
+        <StackPanel>
+          <DockPanel Margin="0,0,0,12">
+            <TextBlock Text="Token 周期" Style="{StaticResource SectionTitleStyle}" />
+            <TextBlock DockPanel.Dock="Right" Text="{Binding TokenStatusText}" Style="{StaticResource MutedTextStyle}" />
+          </DockPanel>
+          <Grid>
+            <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+              <TextBlock Text="当日" Style="{StaticResource CardLabelStyle}" />
+              <TextBlock Text="{Binding TodayTotalText}" Style="{StaticResource TokenNumberStyle}" />
+              <StackPanel Orientation="Horizontal"><TextBlock Text="IN " Foreground="#7ECBFF" Style="{StaticResource SmallTextStyle}" /><TextBlock Text="{Binding TodayInputText}" Foreground="#7ECBFF" Style="{StaticResource SmallTextStyle}" /></StackPanel>
+              <StackPanel Orientation="Horizontal"><TextBlock Text="OUT " Foreground="#C7A4FF" Style="{StaticResource SmallTextStyle}" /><TextBlock Text="{Binding TodayOutputText}" Foreground="#C7A4FF" Style="{StaticResource SmallTextStyle}" /></StackPanel>
+              <TextBlock Text="{Binding TodayPriceText}" Foreground="#79E5B7" Style="{StaticResource SmallTextStyle}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Margin="12,0">
+              <TextBlock Text="近 7 天" Style="{StaticResource CardLabelStyle}" />
+              <TextBlock Text="{Binding SevenDayTotalText}" Style="{StaticResource TokenNumberStyle}" />
+              <StackPanel Orientation="Horizontal"><TextBlock Text="IN " Foreground="#7ECBFF" Style="{StaticResource SmallTextStyle}" /><TextBlock Text="{Binding SevenDayInputText}" Foreground="#7ECBFF" Style="{StaticResource SmallTextStyle}" /></StackPanel>
+              <StackPanel Orientation="Horizontal"><TextBlock Text="OUT " Foreground="#C7A4FF" Style="{StaticResource SmallTextStyle}" /><TextBlock Text="{Binding SevenDayOutputText}" Foreground="#C7A4FF" Style="{StaticResource SmallTextStyle}" /></StackPanel>
+              <TextBlock Text="{Binding SevenDayPriceText}" Foreground="#79E5B7" Style="{StaticResource SmallTextStyle}" />
+            </StackPanel>
+            <StackPanel Grid.Column="2">
+              <TextBlock Text="近 30 天" Style="{StaticResource CardLabelStyle}" />
+              <TextBlock Text="{Binding ThirtyDayTotalText}" Style="{StaticResource TokenNumberStyle}" />
+              <StackPanel Orientation="Horizontal"><TextBlock Text="IN " Foreground="#7ECBFF" Style="{StaticResource SmallTextStyle}" /><TextBlock Text="{Binding ThirtyDayInputText}" Foreground="#7ECBFF" Style="{StaticResource SmallTextStyle}" /></StackPanel>
+              <StackPanel Orientation="Horizontal"><TextBlock Text="OUT " Foreground="#C7A4FF" Style="{StaticResource SmallTextStyle}" /><TextBlock Text="{Binding ThirtyDayOutputText}" Foreground="#C7A4FF" Style="{StaticResource SmallTextStyle}" /></StackPanel>
+              <TextBlock Text="{Binding ThirtyDayPriceText}" Foreground="#79E5B7" Style="{StaticResource SmallTextStyle}" />
+            </StackPanel>
+          </Grid>
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

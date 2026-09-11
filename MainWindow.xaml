@@ -20,6 +20,7 @@
         TextOptions.TextFormattingMode="Display">
   <Window.ContextMenu>
     <ContextMenu>
+      <MenuItem Header="打开控制中心" Click="OpenControlCenterMenuItemOnClick" />
       <MenuItem Header="刷新" Click="RefreshMenuItemOnClick" />
       <Separator />
       <MenuItem Header="退出" Click="ExitMenuItemOnClick" />

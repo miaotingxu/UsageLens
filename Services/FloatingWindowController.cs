@@ -2,12 +2,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using UsageLens.Models;
 
 namespace UsageLens.Services;
 
 public sealed class FloatingWindowController : IDisposable
 {
-    private static readonly TimeSpan CollapseDelay = TimeSpan.FromSeconds(1);
     private static readonly Duration SlideDuration = new(TimeSpan.FromMilliseconds(180));
 
     private readonly Window _window;
@@ -22,6 +22,7 @@ public sealed class FloatingWindowController : IDisposable
     private bool _interactionLocked;
     private bool _isDragging;
     private bool _disposed;
+    private FloatingWindowBehavior _behavior = FloatingWindowBehavior.From(AppSettings.Default);
 
     public FloatingWindowController(
         Window window,
@@ -37,7 +38,7 @@ public sealed class FloatingWindowController : IDisposable
         _setNavigationVisible = setNavigationVisible;
         _expandedLeft = window.Left;
         _expandedTop = window.Top;
-        _collapseTimer = new DispatcherTimer { Interval = CollapseDelay };
+        _collapseTimer = new DispatcherTimer { Interval = _behavior.CollapseDelay };
 
         _card.MouseEnter += CardOnMouseEnter;
         _card.MouseLeave += CardOnMouseLeave;
@@ -57,7 +58,8 @@ public sealed class FloatingWindowController : IDisposable
     {
         ThrowIfDisposed();
 
-        if (_interactionLocked || _isDragging || _card.IsMouseOver || _hoverZone.IsMouseOver)
+        if (!_behavior.AutoCollapseEnabled ||
+            _interactionLocked || _isDragging || _card.IsMouseOver || _hoverZone.IsMouseOver)
         {
             return;
         }
@@ -80,6 +82,19 @@ public sealed class FloatingWindowController : IDisposable
         _interactionLocked = isLocked;
 
         if (isLocked)
+        {
+            CancelCollapse();
+            Expand();
+        }
+    }
+
+    public void ApplyBehavior(FloatingWindowBehavior behavior)
+    {
+        ThrowIfDisposed();
+        _behavior = behavior;
+        _collapseTimer.Interval = behavior.CollapseDelay;
+
+        if (!behavior.AutoCollapseEnabled)
         {
             CancelCollapse();
             Expand();
@@ -138,7 +153,13 @@ public sealed class FloatingWindowController : IDisposable
 
     private void CardOnMouseLeave(object sender, System.Windows.Input.MouseEventArgs e) => ScheduleCollapse();
 
-    private void HoverZoneOnMouseEnter(object sender, System.Windows.Input.MouseEventArgs e) => Expand();
+    private void HoverZoneOnMouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (_behavior.ExpandOnHandleHover)
+        {
+            Expand();
+        }
+    }
 
     private void HoverZoneOnMouseLeave(object sender, System.Windows.Input.MouseEventArgs e) => ScheduleCollapse();
 
