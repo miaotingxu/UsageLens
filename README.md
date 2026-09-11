@@ -35,7 +35,16 @@
 
 当前版本内置四套界面，可通过窗口两侧箭头循环切换：Instrument、Glass、Timeline 和 Terminal。它们共享额度、Token、刷新、倒计时和折叠逻辑，只改变视觉呈现。
 
+> 以下为中性示例数据的界面示意；不包含真实账号、会话或用量数据。
+
 ![UsageLens four interface styles](assets/screenshots/ui-overview.png)
+
+控制中心预览（中性示例数据）：
+
+![UsageLens control center](docs/screenshots/control-center.png)
+
+完整的尺寸、间距、字体、颜色、状态流转、JSON-RPC 示例、设置文件和验收标准见
+[控制中心开发文档](docs/superpowers/plans/2026-09-11-usagelens-tray-control-center.md)。
 
 ## 下载与安装
 
@@ -68,11 +77,14 @@
 | 点击左侧或右侧箭头 | 循环切换四套 UI |
 | 鼠标离开窗口 1 秒 | 向顶部自动折叠 |
 | 鼠标移入顶部把手 | 立即展开 |
+| 浮窗右键 → 打开控制中心 | 打开五页控制中心 |
 | 右键 → 刷新 | 同时刷新额度和 Token 用量 |
 | 右键 → 退出 | 关闭程序 |
 
-样式和水平位置保存在 `%LOCALAPPDATA%\UsageLens\appearance.json`，只包含样式名称和窗口横坐标，不包含账号、额度或会话数据。
-首次启动新版时，如果新目录尚无有效配置，程序会从旧版 `%LOCALAPPDATA%\CodexQuotaFloat\appearance.json` 迁移样式和横坐标；旧目录不会删除。
+样式、窗口行为和刷新周期保存在 `%LOCALAPPDATA%\UsageLens\settings.json`，只包含界面偏好，不包含账号、额度或会话数据。
+首次启动新版时，如果新目录尚无有效配置，程序会从旧版 `%LOCALAPPDATA%\UsageLens\appearance.json` 或 `%LOCALAPPDATA%\CodexQuotaFloat\appearance.json` 迁移样式和横坐标；旧文件不会删除。
+
+启动后可以从通知区域托盘图标打开控制中心。控制中心包含总览、额度窗口、Token 用量、会话来源和设置五个页面；托盘左键默认打开控制中心，双击托盘图标显示或隐藏悬浮窗，右键可刷新、切换四套样式或退出。
 
 ## 数据来源与隐私
 
@@ -126,19 +138,21 @@ dotnet run --project .\UsageLens.csproj
 ```powershell
 dotnet run --project .\tests\UsageLens.TokenUsageTests\UsageLens.TokenUsageTests.csproj -c Release
 dotnet run --project .\tests\UsageLens.PresentationTests\UsageLens.PresentationTests.csproj -c Release
+dotnet run --project .\tests\UsageLens.SettingsTests\UsageLens.SettingsTests.csproj -c Release
+dotnet run --project .\tests\UsageLens.CoordinatorTests\UsageLens.CoordinatorTests.csproj -c Release
 ```
 
 生成便携包：
 
 ```powershell
-.\scripts\package-release.ps1 -Version 1.0.1
+.\scripts\package-release.ps1 -Version 1.1.0
 ```
 
 ## 路线图
 
 - 改善多显示器体验。
-- 提供可配置的刷新与折叠行为。
 - 扩展可识别模型和价格规则。
+- 增加按日 Token 趋势与更多模型价格覆盖。
 - 改善发布包签名和更新体验。
 
 ## 参与贡献与 License

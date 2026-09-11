@@ -2,19 +2,15 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
-    <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="../../Models/FloatingStyleKind.cs" Link="Models/FloatingStyleKind.cs" />
     <Compile Include="../../Models/AppSettings.cs" Link="Models/AppSettings.cs" />
+    <Compile Include="../../Models/FloatingStyleKind.cs" Link="Models/FloatingStyleKind.cs" />
     <Compile Include="../../Models/TrayPrimaryAction.cs" Link="Models/TrayPrimaryAction.cs" />
     <Compile Include="../../Services/AppSettingsStore.cs" Link="Services/AppSettingsStore.cs" />
-    <Compile Include="../../Services/HorizontalWindowPlacement.cs" Link="Services/HorizontalWindowPlacement.cs" />
-    <Compile Include="../../Services/QuotaPresentation.cs" Link="Services/QuotaPresentation.cs" />
-    <Compile Include="../../Views/ICollapsibleDashboard.cs" Link="Views/ICollapsibleDashboard.cs" />
-    <Compile Include="../../Views/DashboardBackgroundOpacity.cs" Link="Views/DashboardBackgroundOpacity.cs" />
+    <Compile Include="../../Services/StartupRegistrationService.cs" Link="Services/StartupRegistrationService.cs" />
   </ItemGroup>
 </Project>

@@ -5,12 +5,18 @@
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
+    <ApplicationIcon>Assets\UsageLens.ico</ApplicationIcon>
     <AssemblyName>UsageLens</AssemblyName>
     <RootNamespace>UsageLens</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="tests/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
+    <Resource Include="Assets\UsageLens.ico" />
   </ItemGroup>
 </Project>

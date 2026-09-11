@@ -3,16 +3,21 @@ using System.Windows.Media.Effects;
 
 namespace UsageLens.Views;
 
-public partial class GlassDashboard : UserControl, ICollapsibleDashboard
+public partial class GlassDashboard : UserControl, ICollapsibleDashboard, IBackgroundOpacityDashboard
 {
     private readonly Effect? _cardShadow;
+    private readonly System.Windows.Media.Brush _cardBackground;
 
     public GlassDashboard()
     {
         InitializeComponent();
         _cardShadow = DashboardCard.Effect;
+        _cardBackground = DashboardCard.Background;
     }
 
     public void SetCardShadowVisible(bool isVisible) =>
         DashboardCard.Effect = isVisible ? _cardShadow : null;
+
+    public void SetCardBackgroundOpacity(double opacity) =>
+        DashboardCard.Background = DashboardBackgroundOpacity.WithOpacity(_cardBackground, opacity);
 }

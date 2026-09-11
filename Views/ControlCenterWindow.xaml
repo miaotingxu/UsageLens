@@ -1,0 +1,102 @@
+<Window x:Class="UsageLens.Views.ControlCenterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:pages="clr-namespace:UsageLens.Views.Pages"
+        Width="920"
+        Height="640"
+        MinWidth="860"
+        MinHeight="600"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="CanResize"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="True"
+        Title="UsageLens 控制中心"
+        Loaded="WindowOnLoaded"
+        Closing="WindowOnClosing"
+        Closed="WindowOnClosed"
+        MouseLeftButtonDown="WindowOnMouseLeftButtonDown">
+  <Window.Resources>
+    <Style x:Key="NavButtonStyle" TargetType="Button">
+      <Setter Property="Height" Value="40" />
+      <Setter Property="Margin" Value="0,0,0,6" />
+      <Setter Property="Padding" Value="12,0" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="Foreground" Value="#91A1B7" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="FontFamily" Value="Segoe UI, Microsoft YaHei UI" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="NavBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10">
+              <ContentPresenter VerticalAlignment="Center" Margin="{TemplateBinding Padding}" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="NavBorder" Property="Background" Value="#1E3C4B" /></Trigger>
+              <Trigger Property="IsPressed" Value="True"><Setter TargetName="NavBorder" Property="Background" Value="#285B58" /></Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    <Style x:Key="CardLabelStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#8FA1B7" /><Setter Property="FontSize" Value="11" /><Setter Property="FontWeight" Value="SemiBold" /></Style>
+    <Style x:Key="SectionTitleStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#E2EBF7" /><Setter Property="FontSize" Value="14" /><Setter Property="FontWeight" Value="SemiBold" /></Style>
+    <Style x:Key="BodyTextStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#BAC8D8" /><Setter Property="FontSize" Value="12" /><Setter Property="TextWrapping" Value="Wrap" /></Style>
+    <Style x:Key="MutedTextStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#74879E" /><Setter Property="FontSize" Value="10" /></Style>
+    <Style x:Key="SmallTextStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#BAC8D8" /><Setter Property="FontSize" Value="10" /></Style>
+    <Style x:Key="ValueTextStyle" TargetType="TextBlock"><Setter Property="FontSize" Value="12" /><Setter Property="FontWeight" Value="SemiBold" /><Setter Property="HorizontalAlignment" Value="Right" /></Style>
+    <Style x:Key="ResetTextStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#BAC8D8" /><Setter Property="FontSize" Value="11" /><Setter Property="Margin" Value="0,3,0,0" /></Style>
+    <Style x:Key="BigNumberStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#F2F7FF" /><Setter Property="FontSize" Value="30" /><Setter Property="FontWeight" Value="Bold" /><Setter Property="Margin" Value="0,12,0,4" /></Style>
+    <Style x:Key="HugeNumberStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#F2F7FF" /><Setter Property="FontSize" Value="30" /><Setter Property="FontWeight" Value="Bold" /><Setter Property="Margin" Value="0,15,0,0" /></Style>
+    <Style x:Key="TokenNumberStyle" TargetType="TextBlock"><Setter Property="Foreground" Value="#F2F7FF" /><Setter Property="FontSize" Value="24" /><Setter Property="FontWeight" Value="Bold" /><Setter Property="Margin" Value="0,8,0,4" /></Style>
+    <Style x:Key="PriceStyle" TargetType="TextBlock"><Setter Property="FontSize" Value="14" /><Setter Property="FontWeight" Value="SemiBold" /><Setter Property="HorizontalAlignment" Value="Right" /></Style>
+    <Style x:Key="SummaryCardStyle" TargetType="Border"><Setter Property="Padding" Value="16" /><Setter Property="Background" Value="#172838" /><Setter Property="BorderBrush" Value="#20FFFFFF" /><Setter Property="BorderThickness" Value="1" /><Setter Property="CornerRadius" Value="14" /></Style>
+    <Style x:Key="SectionCardStyle" TargetType="Border"><Setter Property="Padding" Value="17" /><Setter Property="Background" Value="#132333" /><Setter Property="BorderBrush" Value="#18FFFFFF" /><Setter Property="BorderThickness" Value="1" /><Setter Property="CornerRadius" Value="14" /></Style>
+  </Window.Resources>
+
+  <Border CornerRadius="16" Background="#F20A111C" BorderBrush="#8C2C4053" BorderThickness="1">
+    <Grid>
+      <Grid.ColumnDefinitions><ColumnDefinition Width="176" /><ColumnDefinition /></Grid.ColumnDefinitions>
+      <Border Grid.Column="0" Background="#D9192B3B" BorderBrush="#18FFFFFF" BorderThickness="0,0,1,0" Padding="16,23">
+        <DockPanel>
+          <Border DockPanel.Dock="Bottom" Background="#182737" BorderBrush="#18FFFFFF" BorderThickness="1" CornerRadius="11" Padding="11" Margin="0,16,0,0">
+            <StackPanel><TextBlock Text="● 本机数据 · 已保护" Foreground="#79E5B7" FontSize="10" /><TextBlock Text="{Binding LastUpdatedText}" Foreground="#74879E" FontSize="9" Margin="0,4,0,0" /></StackPanel>
+          </Border>
+          <StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,31">
+              <Border Width="30" Height="30" CornerRadius="9" Background="#79E5B7"><TextBlock Text="U" Foreground="#081710" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+              <StackPanel Margin="10,0,0,0"><TextBlock Text="UsageLens" Foreground="#F2F7FF" FontSize="16" FontWeight="SemiBold" /><TextBlock Text="AI usage control center" Foreground="#74879E" FontSize="9" Margin="0,3,0,0" /></StackPanel>
+            </StackPanel>
+            <Button x:Name="OverviewNavButton" Style="{StaticResource NavButtonStyle}" Command="{Binding SelectOverviewCommand}"><StackPanel Orientation="Horizontal"><TextBlock Text="◈" Foreground="#79E5B7" Width="25" /><TextBlock Text="总览" /></StackPanel></Button>
+            <Button x:Name="QuotaNavButton" Style="{StaticResource NavButtonStyle}" Command="{Binding SelectQuotaCommand}"><StackPanel Orientation="Horizontal"><TextBlock Text="◒" Foreground="#79E5B7" Width="25" /><TextBlock Text="额度窗口" /></StackPanel></Button>
+            <Button x:Name="TokenNavButton" Style="{StaticResource NavButtonStyle}" Command="{Binding SelectTokenUsageCommand}"><StackPanel Orientation="Horizontal"><TextBlock Text="✦" Foreground="#79E5B7" Width="25" /><TextBlock Text="Token 用量" /></StackPanel></Button>
+            <Button x:Name="SessionNavButton" Style="{StaticResource NavButtonStyle}" Command="{Binding SelectSessionSourceCommand}"><StackPanel Orientation="Horizontal"><TextBlock Text="☷" Foreground="#79E5B7" Width="25" /><TextBlock Text="会话来源" /></StackPanel></Button>
+            <Button x:Name="SettingsNavButton" Style="{StaticResource NavButtonStyle}" Command="{Binding SelectSettingsCommand}"><StackPanel Orientation="Horizontal"><TextBlock Text="⚙" Foreground="#79E5B7" Width="25" /><TextBlock Text="设置" /></StackPanel></Button>
+          </StackPanel>
+        </DockPanel>
+      </Border>
+
+      <Grid Grid.Column="1" Margin="28,24,28,20">
+        <Grid.RowDefinitions><RowDefinition Height="58" /><RowDefinition /></Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+          <StackPanel><TextBlock Text="{Binding SelectedPageTitle}" Foreground="#F2F7FF" FontSize="24" FontWeight="SemiBold" /><TextBlock Text="{Binding SelectedPageSubtitle}" Foreground="#8FA1B7" FontSize="12" Margin="0,6,0,0" /></StackPanel>
+          <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" VerticalAlignment="Top">
+            <Border Background="#182E2B" BorderBrush="#3879E5B7" BorderThickness="1" CornerRadius="11" Padding="10,6" Margin="0,0,8,0" MaxWidth="270">
+              <StackPanel>
+                <TextBlock Text="{Binding AccountStatusText}" Foreground="#79E5B7" FontSize="10" />
+                <TextBlock Text="{Binding AccountPrivacyText}" Foreground="#8FA1B7" FontSize="9" TextWrapping="Wrap" Margin="0,3,0,0" />
+              </StackPanel>
+            </Border>
+            <Button Width="32" Height="32" Content="↻" Command="{Binding RefreshCommand}" ToolTip="立即刷新" AutomationProperties.Name="立即刷新" Background="#14FFFFFF" Foreground="#AFC0D2" BorderBrush="#24FFFFFF" BorderThickness="1" FontSize="16" />
+            <Button Width="32" Height="32" Content="×" Click="CloseButtonOnClick" ToolTip="隐藏控制中心" AutomationProperties.Name="隐藏控制中心" Background="#14FFFFFF" Foreground="#AFC0D2" BorderBrush="#24FFFFFF" BorderThickness="1" FontSize="16" Margin="8,0,0,0" />
+          </StackPanel>
+        </Grid>
+        <ContentControl x:Name="PageContent" Grid.Row="1" Margin="0,10,0,0" />
+      </Grid>
+    </Grid>
+  </Border>
+</Window>

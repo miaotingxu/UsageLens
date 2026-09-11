@@ -9,6 +9,7 @@ public partial class App : Application
 
     private Mutex? _singleInstanceMutex;
     private bool _ownsMutex;
+    private AppHost? _host;
 
     private void OnStartup(object sender, StartupEventArgs e)
     {
@@ -23,17 +24,14 @@ public partial class App : Application
             return;
         }
 
-        var mainWindow = new MainWindow();
-        MainWindow = mainWindow;
-        mainWindow.Show();
+        _host = new AppHost();
+        _host.Start();
     }
 
     private void OnExit(object sender, ExitEventArgs e)
     {
-        if (MainWindow is MainWindow window)
-        {
-            window.Dispose();
-        }
+        _host?.Dispose();
+        _host = null;
 
         if (_ownsMutex)
         {
